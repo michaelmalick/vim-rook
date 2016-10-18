@@ -1,0 +1,113 @@
+*rook.txt* Evaluate R code in a tmux pane
+
+
+==============================================================================
+VIM-ROOK                                                            *vim-rook*
+
+Basic vim support for evaluating R code in a tmux pane.
+
+
+==============================================================================
+COMMANDS                                                       *rook-commands*
+
+:Rattach            Specify a target tmux pane to evaluate code in. The format
+                    needs to be: `session_name:window_name.pane_index`  (e.g.,
+                    `sess:win.1`). Tab completion can be used to specify the
+                    target pane. The selected target pane is remembered
+                    throughout the vim editing session. The target pane can be
+                    changed by calling the :Rattach command again.
+
+:Rwrite [args]      Given an argument, take the text given in [args] and send
+                    it to the target tmux pane, e.g., `:Rwrite ls()` will send
+                    the `ls()` command to be evaluated.
+
+:[range]Rwrite      Given a range, take the text given in [range] and send it
+                    to the target tmux pane to be evaluated.
+
+:Rwrite             With neither a range or an argument, send the current line
+                    to the target tmux pane to be evaluated.
+
+:Rhelp[args]        Given an R function name as [args], split the current
+                    window and open the associated R help file in a new vim
+                    buffer. A new buffer is created for each unique function
+                    that is looked up. The command uses the R `help()`
+                    function and searches all installed packages for help
+                    files. Tab completion of function names is provided for
+                    most of the functions that are distributed with R (e.g.,
+                    functions in the base, MASS, graphics, and lattice
+                    packages). Tab completion of functions from packages not
+                    distributed with R (e.g., ggplot, dplyr) is not provided.
+
+:Rhelp              Given no arguments, the word under the cursor is used to
+                    populate the `help()` function. 
+
+:Rview[args]        Given an R function as [args], wrap the word under the
+                    cursor in the [args] function name and evaluate it in the
+                    target tmux pane.  For example `:Rview head` will send
+                    `head(<cword>)` to be evaluated in R. Tab completion of
+                    function names is available.
+
+:Rview              Given no arguments, the previous function supplied to
+                    `:Rview` is used.
+
+
+==============================================================================
+MAPPINGS                                                       *rook-mappings*
+
+Rook does not provide any mappings. If you want to send code from a vim buffer
+to the selected tmux pane, add the following mappings to your .vimrc:
+
+    xmap gl  <Plug>RookSend      " Send selected text
+    nmap gl  <Plug>RookSend      " Send motion/text object
+    nmap gll <Plug>RookSendLine  " Send current line
+
+To send the current line to the tmux pane, use `gll`. Use `gl` followed by a
+motion to send the motion target, e.g., `glip` will send a paragraph. In
+visual mode, use `gl` to send the current selection.
+
+If you want key mappings to evaluate frequently used commands (with path
+expansion), you can use the rook#send_text function. For example, the
+following mapping will source the current file in the target R session:
+
+    nnoremap <silent> <leader>rs :call 
+        \ rook#send_text('source("' . expand('%:p') . '")')<CR>
+
+
+==============================================================================
+CONFIGURATIONS                                           *rook-configurations*
+
+You can change the following settings to control how Rook works.
+
+------------------------------------------------------------------------------
+g:rook_tmp_file                          default: file output from tmpname()
+
+Set this to change the location of the temporary file Rook uses to send
+commands (needs a full path):
+
+    let g:rook_tmp_file = "/tmp/vim-rook-tmp-file"
+
+------------------------------------------------------------------------------
+g:rook_source_send                                                default: 1
+
+When set to 0, sent selections, paragraphs, etc. will be sent line wise, that
+is, each line will appear in the selected pane. This can be slow if sending a
+large number of lines. If set to 1 (the default), sent text in excess of a
+single line is evaluated using the source() function in R. This is a much
+faster way to send large chunks of code, however, the sent code is not
+viewable in R.
+
+
+==============================================================================
+BUGS                                                               *rook-bugs*
+
+If you find a bug, please post it on the issue tracker:
+http://github.com/michaelmalick/vim-rook/issues/
+
+
+==============================================================================
+LICENSE                                                         *rook-license*
+
+MIT/X11
+
+
+vim:tw=78:et:ft=help:norl:nowrap:

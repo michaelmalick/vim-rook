@@ -1,0 +1,17 @@
+Sweave test
+
+<<my-label, eval=TRUE, dev='png'  >>=
+
+# comment
+ls()
+x <- 10
+y <- 10
+
+test <- function(x,
+              y) {
+    out = x + y
+    return(out)
+}
+
+@
+
