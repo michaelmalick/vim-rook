@@ -146,8 +146,8 @@ function! rook#send_text(text)
     else
         let send_text = shellescape(a:text)
         " include the literal flag so Tmux keywords are not looked up
-        call system("tmux send-keys -l -t " . g:rook_pane_id . " " . send_text)
-        call system("tmux send-keys -t " . g:rook_pane_id . " " . "Enter")
+        call system('tmux send-keys -l -t ' . g:rook_pane_id . ' "" ' . send_text)
+        call system('tmux send-keys -t ' . g:rook_pane_id . ' ' . "Enter")
     endif
 endfunction
 
