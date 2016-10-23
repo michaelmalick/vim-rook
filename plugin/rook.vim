@@ -1,4 +1,4 @@
-" rook.vim - Evaluate R code in a tmux pane
+" rook.vim - Evaluate R code in a tmux pane or neovim terminal
 " Author:   Michael Malick <malickmj@gmail.com>
 " Version:  1.0
 
@@ -16,8 +16,15 @@ if !exists('g:rook_source_send')
     let g:rook_source_send = 1
 endif
 
+if !exists('g:rook_target_type')
+    if has('nvim')
+        let g:rook_target_type = 'neovim'
+    else
+        let g:rook_target_type = 'tmux'
+    endif
+endif
 
-command! -nargs=1 -complete=custom,rook#completion_target_pane Rattach 
+command! -nargs=1 -complete=custom,rook#completion_target Rattach 
     \:call rook#command_rattach(<q-args>)
 
 command! -range -nargs=? Rwrite 

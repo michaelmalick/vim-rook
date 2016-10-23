@@ -20,8 +20,21 @@ function! rook#completion_rfunctions(...)
     return join(s:r_base_functions, "\n")
 endfunction
 
-function! rook#completion_target_pane(...)
-    return system('tmux list-panes -F "#S:#W.#P" -a')
+function! rook#completion_target(...)
+    if g:rook_target_type == 'tmux'
+        return system('tmux list-panes -F "#S:#W.#P" -a')
+    elseif g:rook_target_type == 'neovim'
+        let l:max_bufnr = bufnr('$')
+        let l:bufname_list = []
+        let c = 1
+        while c <= l:max_bufnr
+            if bufexists(c) && buflisted(c)
+                call add(l:bufname_list, bufname(c))
+            endif
+            let c += 1
+        endwhile
+        return join(l:bufname_list, "\n")
+    endif
 endfunction
 
 function! rook#command_rview(function)
@@ -68,8 +81,8 @@ function! rook#command_rhelp(function)
 endfunction
 
 function! rook#command_rwrite(line1, line2, commands)
-    if !exists("g:rook_pane_id")
-        echohl WarningMsg | echo "Rook: no target pane attached" | echohl None
+    if !exists("g:rook_target_id")
+        echohl WarningMsg | echo "Rook: no target attached" | echohl None
         return
     endif
     if empty(a:commands) && !empty(a:line1) && !empty(a:line2)
@@ -81,26 +94,43 @@ function! rook#command_rwrite(line1, line2, commands)
 endfunction
 
 function! rook#command_rattach(selected)
-    let paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
-    let proposal_id = matchstr(paneslist, '%\d\+\ze '.a:selected.'\>')
-    if empty(proposal_id)
-        echohl WarningMsg
-        echo "Rook: ".a:selected." doesn't exist"
-        echohl None
-        return
-    endif
-    if proposal_id ==# $TMUX_PANE && !has('gui_running')
-        echohl WarningMsg | echo "Rook: can't attach own pane" | echohl None
-        return
-    else
-        let g:rook_pane_id = proposal_id
+    if g:rook_target_type == 'tmux'
+        let paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
+        let proposal_id = matchstr(paneslist, '%\d\+\ze '.a:selected.'\>')
+        if empty(proposal_id)
+            echohl WarningMsg
+            echo "Rook: ".a:selected." doesn't exist"
+            echohl None
+            return
+        endif
+        if proposal_id ==# $TMUX_PANE && !has('gui_running')
+            echohl WarningMsg | echo "Rook: can't attach own pane" | echohl None
+            return
+        else
+            let g:rook_target_id = proposal_id
+        endif
+    elseif g:rook_target_type == 'neovim' " a:selected is a buffer name
+        let l:bufnr = bufnr(a:selected)
+        if !bufexists(l:bufnr)
+            echohl WarningMsg
+            echo "Rook: buffer ".a:selected." doesn't exist"
+            echohl None
+            return
+        endif
+        let g:rook_target_id = getbufvar(bufname(l:bufnr), 'terminal_job_id')
+        if empty(g:rook_target_id)
+            echohl WarningMsg
+                echo "Rook: no terminal running in selected buffer"
+            echohl None
+            return
+        endif
     endif
 endfunction
 
 function! rook#opfunc(type, ...)
     " See :h g@
-    if !exists("g:rook_pane_id")
-        echohl WarningMsg | echo "Rook: no target pane attached" | echohl None
+    if !exists("g:rook_target_id")
+        echohl WarningMsg | echo "Rook: no target attached" | echohl None
         call s:rook_restore_view()
         return
     endif
@@ -122,8 +152,8 @@ function! rook#opfunc(type, ...)
 endfunction
 
 function! rook#send_selection()
-    if !exists("g:rook_pane_id")
-        echohl WarningMsg | echo "Rook: no target pane attached" | echohl None
+    if !exists("g:rook_target_id")
+        echohl WarningMsg | echo "Rook: no target attached" | echohl None
         return
     endif
     call s:rook_save_selection()
@@ -140,14 +170,17 @@ function! rook#send_selection()
 endfunction
 
 function! rook#send_text(text)
-    if !exists("g:rook_pane_id")
-        echohl WarningMsg | echo "Rook: no target pane attached" | echohl None
+    if !exists("g:rook_target_id")
+        echohl WarningMsg | echo "Rook: no target attached" | echohl None
         return
-    else
+    endif
+    if g:rook_target_type == 'tmux'
         let send_text = shellescape(a:text)
         " include the literal flag so Tmux keywords are not looked up
-        call system('tmux send-keys -l -t ' . g:rook_pane_id . ' "" ' . send_text)
-        call system('tmux send-keys -t ' . g:rook_pane_id . ' ' . "Enter")
+        call system("tmux send-keys -l -t " . g:rook_target_id . " " . send_text)
+        call system("tmux send-keys -t " . g:rook_target_id . " " . "Enter")
+    elseif g:rook_target_type == 'neovim'
+        call jobsend(g:rook_target_id, [a:text, ""]) 
     endif
 endfunction
 

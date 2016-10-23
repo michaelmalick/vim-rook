@@ -1,31 +1,37 @@
-*rook.txt* Evaluate R code in a tmux pane
+*rook.txt* Evaluate R code in a tmux pane or neovim terminal
 
 
 ==============================================================================
 VIM-ROOK                                                            *vim-rook*
 
-Basic vim support for evaluating R code in a tmux pane.
+Lightweigt plugin for evaluating R code in a tmux pane or neovim terminal.
 
 
 ==============================================================================
 COMMANDS                                                       *rook-commands*
 
-:Rattach            Specify a target tmux pane to evaluate code in. The format
-                    needs to be: `session_name:window_name.pane_index`  (e.g.,
-                    `sess:win.1`). Tab completion can be used to specify the
-                    target pane. The selected target pane is remembered
-                    throughout the vim editing session. The target pane can be
-                    changed by calling the :Rattach command again.
+:Rattach [args]     Specify a target tmux pane or neovim terminal buffer to
+                    evaluate code in. For tmux, the format of [args] needs to
+                    be: `session_name:window_name.pane_index`  (e.g.,
+                    `sess:win.1`). For neovim [args] should be a buffer name.
+                    Tab completion can be used to specify the target. The
+                    selected target is remembered throughout the vim/neovim
+                    editing session. The target can be changed by calling the
+                    :Rattach command again. When running neovim, :Rattach
+                    assumes the target is a neovim terminal buffer (even if
+                    neovim is running inside tmux). When running vim, :Rattach
+                    assumes the target is a tmux pane. This behaviour can be
+                    changed by setting the `g:rook_target_type` variable.
 
 :Rwrite [args]      Given an argument, take the text given in [args] and send
-                    it to the target tmux pane, e.g., `:Rwrite ls()` will send
+                    it to the target R console, e.g., `:Rwrite ls()` will send
                     the `ls()` command to be evaluated.
 
 :[range]Rwrite      Given a range, take the text given in [range] and send it
-                    to the target tmux pane to be evaluated.
+                    to the target R console to be evaluated.
 
 :Rwrite             With neither a range or an argument, send the current line
-                    to the target tmux pane to be evaluated.
+                    to the target R console to be evaluated.
 
 :Rhelp[args]        Given an R function name as [args], split the current
                     window and open the associated R help file in a new vim
@@ -43,7 +49,7 @@ COMMANDS                                                       *rook-commands*
 
 :Rview[args]        Given an R function as [args], wrap the word under the
                     cursor in the [args] function name and evaluate it in the
-                    target tmux pane.  For example `:Rview head` will send
+                    target R console. For example `:Rview head` will send
                     `head(<cword>)` to be evaluated in R. Tab completion of
                     function names is available.
 
@@ -55,13 +61,13 @@ COMMANDS                                                       *rook-commands*
 MAPPINGS                                                       *rook-mappings*
 
 Rook does not provide any mappings. If you want to send code from a vim buffer
-to the selected tmux pane, add the following mappings to your .vimrc:
+to the selected R console, add the following mappings to your .vimrc:
 
     xmap gl  <Plug>RookSend      " Send selected text
     nmap gl  <Plug>RookSend      " Send motion/text object
     nmap gll <Plug>RookSendLine  " Send current line
 
-To send the current line to the tmux pane, use `gll`. Use `gl` followed by a
+To send the current line, use `gll`. Use `gl` followed by a
 motion to send the motion target, e.g., `glip` will send a paragraph. In
 visual mode, use `gl` to send the current selection.
 
@@ -79,6 +85,16 @@ CONFIGURATIONS                                           *rook-configurations*
 You can change the following settings to control how Rook works.
 
 ------------------------------------------------------------------------------
+g:rook_target_type
+
+This variable identifies where the target R console is running and can be set
+to either 'tmux' or 'neovim'. By default, `g:rook_target_type` is set to
+'neovim' if neovim is being used and to 'tmux' otherwise. Manually setting
+this variable to 'tmux' requires the target console to be running in a tmux
+pane and setting it to 'neovim' requires the target console to be running in a
+neovim terminal buffer.
+
+------------------------------------------------------------------------------
 g:rook_tmp_file                          default: file output from tmpname()
 
 Set this to change the location of the temporary file Rook uses to send
@@ -90,10 +106,10 @@ commands (needs a full path):
 g:rook_source_send                                                default: 1
 
 When set to 0, sent selections, paragraphs, etc. will be sent line wise, that
-is, each line will appear in the selected pane. This can be slow if sending a
-large number of lines. If set to 1 (the default), sent text in excess of a
-single line is evaluated using the source() function in R. This is a much
-faster way to send large chunks of code, however, the sent code is not
+is, each line will appear in the selected target R console. This can be slow
+if sending a large number of lines. If set to 1 (the default), sent text in
+excess of a single line is evaluated using the source() function in R. This is
+a much faster way to send large chunks of code, however, the sent code is not
 viewable in R.
 
 
