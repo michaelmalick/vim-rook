@@ -1,4 +1,29 @@
-# R test
+# rook.vim R tests
+
+# 1. :Rattach
+#    - :Rattach <no-args> (should throw error)
+#    - :Rattach current-pane (should throw warning)
+#    - :Rattach target-pane
+
+# 2. :Rwrite
+#    - :Rwrite 'ls()'
+#    - :Rwrite <no-args>
+#    - :Rwrite <visual-selection>
+#    - :8,10Rwrite <range>
+
+# 3. :Rhelp
+#    - :Rhelp ls (running a second time should open previous buffer)
+#    - :Rhelp (run with cursor over function)
+
+# 4. :Rview
+#    - :Rview <no-args> (on first call, should throw warning)
+#    - :Rview head (run with cursor over iris)
+#    - :Rview <no-args> (with cursor over iris)
+
+# 5. mappings
+#   - gl    selected text
+#   - gl    motion/text object
+#   - gll   current line
 
 
 # comment
