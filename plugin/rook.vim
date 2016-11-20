@@ -44,10 +44,7 @@ nnoremap <silent> <Plug>RookSendLine :<C-U>call rook#send_line()<Bar>
 augroup rook_plugin
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
-    if g:rook_source_send
-        let s:source_cmd = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
-        autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-            \ let g:rook_source_command = s:source_cmd
-    endif
+    autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
+        \ call rook#source_cmd()
 augroup END
 

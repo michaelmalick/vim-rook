@@ -1,6 +1,12 @@
 " rook.vim - autoload functions
 " Author:   Michael Malick <malickmj@gmail.com>
 
+function! rook#source_cmd()
+    if g:rook_source_send
+        let g:rook_source_command = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
+    endif
+endfunction
+
 function! rook#send_line()
     let g:rook_count1 = v:count1
     call rook#save_view()
