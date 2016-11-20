@@ -45,9 +45,9 @@ augroup rook_plugin
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
     if g:rook_source_send
-        let source_cmd = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
+        let s:source_cmd = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
         autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-            \ let g:rook_source_command = source_cmd
+            \ let g:rook_source_command = s:source_cmd
     endif
 augroup END
 

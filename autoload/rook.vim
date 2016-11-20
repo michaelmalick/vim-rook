@@ -26,51 +26,51 @@ function! rook#completion_target(...)
     elseif g:rook_target_type ==# 'neovim'
         let l:max_bufnr = bufnr('$')
         let l:bufname_list = []
-        let c = 1
-        while c <= l:max_bufnr
-            if bufexists(c) && buflisted(c)
-                call add(l:bufname_list, bufname(c))
+        let l:c = 1
+        while l:c <= l:max_bufnr
+            if bufexists(l:c) && buflisted(l:c)
+                call add(l:bufname_list, bufname(l:c))
             endif
-            let c += 1
+            let l:c += 1
         endwhile
         return join(l:bufname_list, "\n")
     endif
 endfunction
 
 function! rook#command_rview(function)
-    let word = expand("<cword>")
+    let l:word = expand("<cword>")
     if !empty(a:function)
         let g:rook_rview_fun = a:function
-        let text = a:function.'('.word.')'
-        call rook#send_text(text)
+        let l:text = a:function.'('.l:word.')'
+        call rook#send_text(l:text)
     elseif !exists('g:rook_rview_fun')
         echohl WarningMsg | echo "Rook: no previous function" | echohl None
         return
     else
-        let text = g:rook_rview_fun.'('.word.')'
-        call rook#send_text(text)
+        let l:text = g:rook_rview_fun.'('.l:word.')'
+        call rook#send_text(l:text)
     endif
 endfunction
 
 function! rook#command_rhelp(function)
     if empty(a:function)
-        let word = expand("<cword>")
+        let l:word = expand("<cword>")
     else
-        let word = a:function
+        let l:word = a:function
     endif
-    let rh_bufname = 'RH:'.word
-    if bufexists(rh_bufname) " if buffer exists switch to it
-        let rh_bufnr = bufnr(rh_bufname)
-        if bufwinnr(rh_bufnr) != -1
-            exe bufwinnr(rh_bufnr) . "wincmd w"
+    let l:rh_bufname = 'RH:'.l:word
+    if bufexists(l:rh_bufname) " if buffer exists switch to it
+        let l:rh_bufnr = bufnr(l:rh_bufname)
+        if bufwinnr(l:rh_bufnr) != -1
+            exe bufwinnr(l:rh_bufnr) . "wincmd w"
         else
-            exe 'belowright'.rh_bufnr.'sbuffer'
+            exe 'belowright'.l:rh_bufnr.'sbuffer'
         endif
     else
-        exe 'silent! belowright new '.rh_bufname
-        let helpstr = 'help('.shellescape(word).
+        exe 'silent! belowright new '.l:rh_bufname
+        let l:helpstr = 'help('.shellescape(l:word).
                       \ ', package=(.packages(all.available=TRUE)))'
-        exe 'read !Rscript -e "'.helpstr.'"'
+        exe 'read !Rscript -e "'.l:helpstr.'"'
         exe 'silent! %s/_//g'
         normal! gg
         setlocal buftype=nofile
@@ -95,19 +95,19 @@ endfunction
 
 function! rook#command_rattach(selected)
     if g:rook_target_type ==# 'tmux'
-        let paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
-        let proposal_id = matchstr(paneslist, '%\d\+\ze '.a:selected.'\>')
-        if empty(proposal_id)
+        let l:paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
+        let l:proposal_id = matchstr(l:paneslist, '%\d\+\ze '.a:selected.'\>')
+        if empty(l:proposal_id)
             echohl WarningMsg
             echo "Rook: ".a:selected." doesn't exist"
             echohl None
             return
         endif
-        if proposal_id ==# $TMUX_PANE && !has('gui_running')
+        if l:proposal_id ==# $TMUX_PANE && !has('gui_running')
             echohl WarningMsg | echo "Rook: can't attach own pane" | echohl None
             return
         else
-            let g:rook_target_id = proposal_id
+            let g:rook_target_id = l:proposal_id
         endif
     elseif g:rook_target_type ==# 'neovim' " a:selected is a buffer name
         let l:bufnr = bufnr(a:selected)
@@ -157,13 +157,13 @@ function! rook#send_selection()
         return
     endif
     call s:rook_save_selection()
-    let start_line = line("'<")
-    let end_line = line("'>")
-    if exists("g:rook_source_command") && start_line != end_line
+    let l:start_line = line("'<")
+    let l:end_line = line("'>")
+    if exists("g:rook_source_command") && l:start_line != l:end_line
         call rook#send_text(g:rook_source_command)
     else
-        let select_text = readfile(g:rook_tmp_file)
-        for i in select_text
+        let l:select_text = readfile(g:rook_tmp_file)
+        for i in l:select_text
             call rook#send_text(i)
         endfor
     endif
@@ -175,9 +175,9 @@ function! rook#send_text(text)
         return
     endif
     if g:rook_target_type ==# 'tmux'
-        let send_text = shellescape(a:text)
+        let l:send_text = shellescape(a:text)
         " include the literal flag so Tmux keywords are not looked up
-        call system("tmux send-keys -l -t " . g:rook_target_id . " " . send_text)
+        call system("tmux send-keys -l -t " . g:rook_target_id . " " . l:send_text)
         call system("tmux send-keys -t " . g:rook_target_id . " " . "Enter")
     elseif g:rook_target_type ==# 'neovim'
         call jobsend(g:rook_target_id, [a:text, ""]) 
@@ -189,10 +189,10 @@ function! s:rook_save_selection()
     exe "normal! \<Esc>"
     let [lnum1, col1] = getpos("'<")[1:2]
     let [lnum2, col2] = getpos("'>")[1:2]
-    let lines = getline(lnum1, lnum2)
-    let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
-    let lines[0] = lines[0][col1 - 1:]
-    call writefile(lines, g:rook_tmp_file)
+    let l:lines = getline(lnum1, lnum2)
+    let l:lines[-1] = l:lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
+    let l:lines[0] = l:lines[0][col1 - 1:]
+    call writefile(l:lines, g:rook_tmp_file)
 endfunction
 
 function! rook#save_view()
