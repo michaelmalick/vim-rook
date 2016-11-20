@@ -21,9 +21,9 @@ function! rook#completion_rfunctions(...)
 endfunction
 
 function! rook#completion_target(...)
-    if g:rook_target_type == 'tmux'
+    if g:rook_target_type ==# 'tmux'
         return system('tmux list-panes -F "#S:#W.#P" -a')
-    elseif g:rook_target_type == 'neovim'
+    elseif g:rook_target_type ==# 'neovim'
         let l:max_bufnr = bufnr('$')
         let l:bufname_list = []
         let c = 1
@@ -94,7 +94,7 @@ function! rook#command_rwrite(line1, line2, commands)
 endfunction
 
 function! rook#command_rattach(selected)
-    if g:rook_target_type == 'tmux'
+    if g:rook_target_type ==# 'tmux'
         let paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
         let proposal_id = matchstr(paneslist, '%\d\+\ze '.a:selected.'\>')
         if empty(proposal_id)
@@ -109,7 +109,7 @@ function! rook#command_rattach(selected)
         else
             let g:rook_target_id = proposal_id
         endif
-    elseif g:rook_target_type == 'neovim' " a:selected is a buffer name
+    elseif g:rook_target_type ==# 'neovim' " a:selected is a buffer name
         let l:bufnr = bufnr(a:selected)
         if !bufexists(l:bufnr)
             echohl WarningMsg
@@ -174,12 +174,12 @@ function! rook#send_text(text)
         echohl WarningMsg | echo "Rook: no target attached" | echohl None
         return
     endif
-    if g:rook_target_type == 'tmux'
+    if g:rook_target_type ==# 'tmux'
         let send_text = shellescape(a:text)
         " include the literal flag so Tmux keywords are not looked up
         call system("tmux send-keys -l -t " . g:rook_target_id . " " . send_text)
         call system("tmux send-keys -t " . g:rook_target_id . " " . "Enter")
-    elseif g:rook_target_type == 'neovim'
+    elseif g:rook_target_type ==# 'neovim'
         call jobsend(g:rook_target_id, [a:text, ""]) 
     endif
 endfunction
