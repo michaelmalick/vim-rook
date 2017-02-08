@@ -112,6 +112,23 @@ excess of a single line is evaluated using the source() function in R. This is
 a much faster way to send large chunks of code, however, the sent code is not
 viewable in R.
 
+------------------------------------------------------------------------------
+g:rook_rstudio_folding                                            default: 0
+
+When set to 1, code folding imitates RStudio style folding/sections. Three
+syntax variants can be used to create a fold; in each variant the marker line
+starts with a `#` and ends with four consecutive `#`, `=`, or `-`.
+
+`# syntax 1 ####`
+`# syntax 2 ====`
+`# syntax 3 ----`
+
+RStudio does not have nested folding, therefore, each of the three different
+syntaxes represent a level-1 fold within the file.
+
+When this variable is set to 0 (the default) the user defined default folding
+method is used.
+
 
 ==============================================================================
 BUGS                                                               *rook-bugs*

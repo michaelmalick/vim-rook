@@ -16,6 +16,10 @@ if !exists('g:rook_source_send')
     let g:rook_source_send = 1
 endif
 
+if !exists('g:rook_rstudio_folding')
+    let g:rook_rstudio_folding = 0
+endif
+
 if !exists('g:rook_target_type')
     if has('nvim')
         let g:rook_target_type = 'neovim'
@@ -45,6 +49,6 @@ augroup rook_plugin
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
     autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-        \ call rook#source_cmd()
+        \ call rook#r_autocmd()
 augroup END
 

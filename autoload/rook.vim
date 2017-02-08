@@ -1,6 +1,35 @@
 " rook.vim - autoload functions
 " Author:   Michael Malick <malickmj@gmail.com>
 
+function! rook#r_autocmd()
+    call rook#source_cmd()
+    call rook#fold_expr()
+endfunction
+
+function! rook#rstudio_folding()
+    "" RStudio doesn't have nested folding, i.e., the different markers 
+    "" at the end of the lines do not signify different fold levels
+    let h1 = matchstr(getline(v:lnum), '^#.*#\{4}$')
+    let h2 = matchstr(getline(v:lnum), '^#.*=\{4}$')
+    let h3 = matchstr(getline(v:lnum), '^#.*-\{4}$')
+    if empty(h1) && empty(h2) && empty(h3)
+        return "="
+    elseif !empty(h1)
+        return ">1"
+    elseif !empty(h2)
+        return ">1"
+    elseif !empty(h3)
+        return ">1"
+    endif
+endfunction
+
+function! rook#fold_expr()
+    if g:rook_rstudio_folding
+        setlocal foldmethod=expr
+        setlocal foldexpr=rook#rstudio_folding()
+    endif
+endfunction
+
 function! rook#source_cmd()
     if g:rook_source_send
         let g:rook_source_command = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
