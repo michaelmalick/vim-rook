@@ -43,6 +43,10 @@ COMMANDS                                                       *rook-commands*
                     functions in the base, MASS, graphics, and lattice
                     packages). Tab completion of functions from packages not
                     distributed with R (e.g., ggplot, dplyr) is not provided.
+                    To get help for a function in a specific package, you can
+                    use the `::` notation; `package::function`. For example,
+                    to view the R help file for the `image` function in the
+                    `raster` package, use `raster::image`.
 
 :Rhelp              Given no arguments, the word under the cursor is used to
                     populate the `help()` function. 

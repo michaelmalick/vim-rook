@@ -93,6 +93,13 @@ function! rook#command_rhelp(function)
     else
         let l:word = a:function
     endif
+    if match(l:word, '::') < 0
+        let l:package = '(.packages(all.available=TRUE))'
+        let l:func = l:word
+    else
+        let l:package = split(l:word, '::')[0]
+        let l:func    = split(l:word, '::')[1]
+    endif
     let l:rh_bufname = 'RH:'.l:word
     if bufexists(l:rh_bufname) " if buffer exists switch to it
         let l:rh_bufnr = bufnr(l:rh_bufname)
@@ -103,8 +110,8 @@ function! rook#command_rhelp(function)
         endif
     else
         exe 'silent! belowright new '.l:rh_bufname
-        let l:helpstr = 'help('.shellescape(l:word).
-                      \ ', package=(.packages(all.available=TRUE)))'
+        let l:helpstr = 'help('.shellescape(l:func).
+                      \ ', package='.l:package.')'
         exe 'read !Rscript -e "'.l:helpstr.'"'
         exe 'silent! %s/_//g'
         normal! gg
