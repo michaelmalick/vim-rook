@@ -94,7 +94,8 @@ function! rook#command_rhelp(function)
         let l:word = a:function
     endif
     if match(l:word, '::') < 0
-        let l:package = '(.packages(all.available=TRUE))'
+        " let l:package = '(.packages(all.available=TRUE))'
+        let l:package = 'NULL'
         let l:func = l:word
     else
         let l:package = split(l:word, '::')[0]

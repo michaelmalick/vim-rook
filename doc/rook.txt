@@ -37,19 +37,19 @@ COMMANDS                                                       *rook-commands*
                     window and open the associated R help file in a new vim
                     buffer. A new buffer is created for each unique function
                     that is looked up. The command uses the R `help()`
-                    function and searches all installed packages for help
-                    files. Tab completion of function names is provided for
-                    most of the functions that are distributed with R (e.g.,
-                    functions in the base, MASS, graphics, and lattice
-                    packages). Tab completion of functions from packages not
-                    distributed with R (e.g., ggplot, dplyr) is not provided.
-                    To get help for a function in a specific package, you can
-                    use the `::` notation; `package::function`. For example,
-                    to view the R help file for the `image` function in the
-                    `raster` package, use `raster::image`.
+                    function with the `package` argument set to NULL. To get
+                    help for a function in a specific package, you can use the
+                    `::` notation; `package::function`. For example, to view
+                    the R help file for the `image` function in the `raster`
+                    package, use `raster::image`. Tab completion of function
+                    names is provided for most of the functions that are
+                    distributed with R (e.g., functions in the base, MASS,
+                    graphics, and lattice packages). Tab completion of
+                    functions from packages not distributed with R (e.g.,
+                    ggplot, dplyr) is not provided.
 
 :Rhelp              Given no arguments, the word under the cursor is used to
-                    populate the `help()` function. 
+                    populate the `help()` function argument. 
 
 :Rview[args]        Given an R function as [args], wrap the word under the
                     cursor in the [args] function name and evaluate it in the
