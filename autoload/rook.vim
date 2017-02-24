@@ -208,6 +208,7 @@ function! rook#send_selection()
         let l:select_text = readfile(g:rook_tmp_file)
         for i in l:select_text
             call rook#send_text(i)
+            exe 'sleep 2m'
         endfor
     endif
 endfunction
