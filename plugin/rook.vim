@@ -8,6 +8,10 @@ if exists('g:loaded_rook') || &cp || v:version < 700 || !executable('tmux')
 endif
 let g:loaded_rook = 1
 
+if !exists('g:rook_attach_dict')
+    let g:rook_attach_dict = { }
+endif
+
 if !exists('g:rook_tmp_file')
     let g:rook_tmp_file = tempname()
 endif
@@ -28,6 +32,7 @@ if !exists('g:rook_target_type')
     endif
 endif
 
+"" The single space at the end of the command lines is necessary!!
 command! -nargs=1 -complete=custom,rook#completion_target Rattach 
     \:call rook#command_rattach(<q-args>)
 
@@ -50,5 +55,8 @@ augroup rook_plugin
     autocmd VimLeave * call delete(g:rook_tmp_file)
     autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
         \ call rook#r_autocmd()
+    "" on buffer entry set b:rook_target_id
+    autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
+        \ call rook#set_buffer_target_id()
 augroup END
 

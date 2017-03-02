@@ -4,7 +4,7 @@
 ==============================================================================
 VIM-ROOK                                                            *vim-rook*
 
-Lightweigt plugin for evaluating R code in a tmux pane or neovim terminal.
+Lightweight plugin for evaluating R code in a tmux pane or neovim terminal.
 
 
 ==============================================================================
@@ -14,15 +14,26 @@ COMMANDS                                                       *rook-commands*
                     evaluate code in. For tmux, the format of [args] needs to
                     be: `session_name:window_name.pane_index`  (e.g.,
                     `sess:win.1`). For neovim [args] should be a buffer name.
-                    Tab completion can be used to specify the target. The
-                    selected target is remembered throughout the vim/neovim
-                    editing session. The target can be changed by calling the
-                    :Rattach command again. When running neovim, :Rattach
-                    assumes the target is a neovim terminal buffer (even if
-                    neovim is running inside tmux). When running vim, :Rattach
-                    assumes the target is a tmux pane. This behaviour can be
-                    changed by setting the `g:rook_target_type` variable.
+                    Tab completion can be used to specify the target. 
+                    When running neovim, `Rattach` assumes the target is a
+                    neovim terminal buffer (even if neovim is running inside
+                    tmux). When running vim, `Rattach` assumes the target is a
+                    tmux pane. This behaviour can be changed by setting the
+                    `g:rook_target_type` variable (see |rook-configurations|).
 
+                    When the `Rattach` command is called, the attached target
+                    is set to be buffer local, meaning that a different target
+                    pane/terminal can be specified for each R filetype buffer.
+                    If only one unique target pane/terminal has been set, all
+                    R filetype buffers will automatically be set to send to
+                    this target. If more than one unique target has been set
+                    (i.e., `Rattach` has been called at least twice with two
+                    different targets specified) then targets for all new R
+                    filetype buffers will need to be set manually by calling
+                    `Rattach`. The selected target for a buffer is remembered
+                    throughout the vim/neovim editing session and the buffer
+                    target can be changed by calling `Rattach` again. 
+                    
 :Rwrite [args]      Given an argument, take the text given in [args] and send
                     it to the target R console, e.g., `:Rwrite ls()` will send
                     the `ls()` command to be evaluated.

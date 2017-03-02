@@ -7,7 +7,7 @@ function! rook#r_autocmd()
 endfunction
 
 function! rook#rstudio_folding()
-    "" RStudio doesn't have nested folding, i.e., the different markers 
+    "" RStudio doesn't have nested folding, i.e., the different markers
     "" at the end of the lines do not signify different fold levels
     let h1 = matchstr(getline(v:lnum), '^#.*#\{4}$')
     let h2 = matchstr(getline(v:lnum), '^#.*=\{4}$')
@@ -124,8 +124,13 @@ function! rook#command_rhelp(function)
 endfunction
 
 function! rook#command_rwrite(line1, line2, commands)
-    if !exists("g:rook_target_id")
+    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
         echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        return
+    elseif !s:target_still_exists()
+        echohl WarningMsg
+        echo "Rook: attached target doesn't exist anymore"
+        echohl None
         return
     endif
     if empty(a:commands) && !empty(a:line1) && !empty(a:line2)
@@ -133,6 +138,31 @@ function! rook#command_rwrite(line1, line2, commands)
         call rook#send_selection()
     else
         call rook#send_text(a:commands)
+    endif
+endfunction
+
+function! rook#attach_dict_add(value)
+    let l:curr_bufnr = bufnr('%')
+    let g:rook_attach_dict[l:curr_bufnr] = a:value
+endfunction
+
+function! rook#set_buffer_target_id()
+    let l:curr_bufnr = bufnr('%')
+    let l:unique_targets = uniq(sort(values(g:rook_attach_dict)))
+    if len(l:unique_targets) > 1
+    "" if more than one unique target exists in dict &&
+    ""   if current buffer is listed in dict set b:rook_target_id to its value
+    ""   if current buffer isn't listed in dict set b:rook_target_id = 0
+        let b:rook_target_id = get(g:rook_attach_dict, l:curr_bufnr)
+    elseif len(l:unique_targets) == 1
+    "" if one unique target exists in dict set b:rook_target_id to
+    "" the single unique target
+        let b:rook_target_id = values(g:rook_attach_dict)[0]
+        call rook#attach_dict_add(b:rook_target_id)
+    else
+    "" otherwise set b:rook_target = 0, indicating no target is associated
+    "" with the current buffer
+        let b:rook_target_id = 0
     endif
 endfunction
 
@@ -150,7 +180,9 @@ function! rook#command_rattach(selected)
             echohl WarningMsg | echo "Rook: can't attach own pane" | echohl None
             return
         else
-            let g:rook_target_id = l:proposal_id
+            "" set b:rook_target_id and add it to dict
+            let b:rook_target_id = l:proposal_id
+            call rook#attach_dict_add(b:rook_target_id)
         endif
     elseif g:rook_target_type ==# 'neovim' " a:selected is a buffer name
         let l:bufnr = bufnr(a:selected)
@@ -160,20 +192,30 @@ function! rook#command_rattach(selected)
             echohl None
             return
         endif
-        let g:rook_target_id = getbufvar(bufname(l:bufnr), 'terminal_job_id')
-        if empty(g:rook_target_id)
+        let l:proposal_id = getbufvar(bufname(l:bufnr), 'terminal_job_id')
+        if empty(l:proposal_id)
             echohl WarningMsg
-                echo "Rook: no terminal running in selected buffer"
+            echo "Rook: no terminal running in selected buffer"
             echohl None
             return
+        else
+            "" set b:rook_target_id and add it to dict
+            let b:rook_target_id = l:proposal_id
+            call rook#attach_dict_add(b:rook_target_id)
         endif
     endif
 endfunction
 
 function! rook#opfunc(type, ...)
     " See :h g@
-    if !exists("g:rook_target_id")
+    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
         echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        call s:rook_restore_view()
+        return
+    elseif !s:target_still_exists()
+        echohl WarningMsg
+        echo "Rook: attached target doesn't exist anymore"
+        echohl None
         call s:rook_restore_view()
         return
     endif
@@ -182,7 +224,7 @@ function! rook#opfunc(type, ...)
     elseif a:type == 'line'
         exe "normal! '[V']"
     elseif exists('s:not_in_text_object') && s:not_in_text_object
-        " This conditional is needed otherwise rook#text_object() 
+        " This conditional is needed otherwise rook#text_object()
         " will exe the normal! `[v`] command, which sends the character under
         " the cursor when the cursor is not inside a rook defined text object.
         let s:not_in_text_object = 0
@@ -195,8 +237,13 @@ function! rook#opfunc(type, ...)
 endfunction
 
 function! rook#send_selection()
-    if !exists("g:rook_target_id")
+    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
         echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        return
+    elseif !s:target_still_exists()
+        echohl WarningMsg
+        echo "Rook: attached target doesn't exist anymore"
+        echohl None
         return
     endif
     call s:rook_save_selection()
@@ -214,18 +261,46 @@ function! rook#send_selection()
 endfunction
 
 function! rook#send_text(text)
-    if !exists("g:rook_target_id")
+    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
         echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        return
+    elseif !s:target_still_exists()
+        echohl WarningMsg
+        echo "Rook: attached target doesn't exist anymore"
+        echohl None
         return
     endif
     if g:rook_target_type ==# 'tmux'
         let l:send_text = shellescape(a:text)
         " include the literal flag so Tmux keywords are not looked up
-        call system("tmux send-keys -l -t " . g:rook_target_id . " " . l:send_text)
-        call system("tmux send-keys -t " . g:rook_target_id . " " . "Enter")
+        call system("tmux send-keys -l -t " . b:rook_target_id . " " . l:send_text)
+        call system("tmux send-keys -t " . b:rook_target_id . " " . "Enter")
     elseif g:rook_target_type ==# 'neovim'
-        call jobsend(g:rook_target_id, [a:text, ""]) 
+        call jobsend(b:rook_target_id, [a:text, ""])
     endif
+endfunction
+
+function! s:target_still_exists()
+    "" check that an attached target still exists
+    "" returns 1 if the target was found
+    if g:rook_target_type ==# 'tmux'
+        let l:paneslist = system('tmux list-panes -F "#D" -a')
+        let l:matched = match(l:paneslist, b:rook_target_id)
+        if l:matched == -1
+            let l:out = 0
+        else
+            let l:out = 1
+        endif
+    elseif g:rook_target_type ==# 'neovim'
+        let l:out = 1
+        try
+            let l:pid = jobpid(b:rook_target_id)
+        catch /.*/
+            let l:out = 0
+            return
+        endtry
+    endif
+    return l:out
 endfunction
 
 function! s:rook_save_selection()
@@ -309,7 +384,7 @@ function! rook#text_object(object)
 endfunction
 
 
-"" Completion list taken from running: 
+"" Completion list taken from running:
 ""   library(MASS)
 ""   library(lattice)
 ""   library(grid)

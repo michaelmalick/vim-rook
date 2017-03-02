@@ -61,5 +61,4 @@ To install, I recommend installing
 License
 =======
 Rook is [MIT/X11](http://opensource.org/licenses/MIT) licensed.
-Copyright (c) 2016-2017 Michael Malick
 
