@@ -3,7 +3,7 @@
 " Version:  1.2
 
 
-if exists('g:loaded_rook') || &cp || v:version < 700 || !executable('tmux')
+if exists('g:loaded_rook') || &cp || v:version < 700
   finish
 endif
 let g:loaded_rook = 1
