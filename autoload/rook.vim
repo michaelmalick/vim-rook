@@ -1,10 +1,6 @@
 " rook.vim - autoload functions
 " Author:   Michael Malick <malickmj@gmail.com>
 
-function! rook#r_autocmd()
-    call rook#source_cmd()
-    call rook#fold_expr()
-endfunction
 
 function! rook#rstudio_folding()
     "" RStudio doesn't have nested folding, i.e., the different markers
@@ -325,61 +321,58 @@ function! s:rook_restore_view()
     endif
 endfunction
 
-function! rook#text_object(object)
-    "" a:object can equal: 'rfunction', 'rmdchunk', or 'sweavechunk'
-    let l:startpos = getpos('.')
-    let l:win_view = winsaveview()
-    "" define pattern for start of text object
-    if a:object ==# 'rfunction'
-        let l:pattern = '<-\s*function\s*('
-    elseif a:object ==# 'rmdchunk'
-        let l:pattern = '^```'
-    elseif a:object ==# 'sweavechunk'
-        let l:pattern = '^<<.*>>=\s*$'
+function! s:cursor_in_text_object(start_end)
+    "" a:start_end = [start_line, end_line]
+    "" returns 1 if cursor is inside the
+    "" lines defined by a:start_end (inclusive),
+    "" and 0 othewise.
+    let l:cursor = line('.')
+    "" check if the start of a function is between
+    "" the cursor and the top of the buffer
+    if a:start_end[0] + a:start_end[1] == 0
+        let l:in_fun = 0
+    "" if so, check if cursor is inside the function definition
+    elseif l:cursor < a:start_end[0] || l:cursor > a:start_end[1]
+        let l:in_fun = 0
+    else
+        let l:in_fun = 1
     endif
-    "" check if the start of a text object is between the cursor
-    "" and the top of the buffer
-    let l:found = search(l:pattern, 'nbcW', 1)
-    if !l:found
-        echo 'Rook: cursor not inside '.a:object
+    return l:in_fun
+endfunction
+
+function! s:start_end_rfunction()
+    "" returns a list of start and end line numbers for
+    "" the previous function definition in the buffer,
+    "" [start_line, end_line]. If no previous function
+    "" is found, return [0, 0].
+    let l:win_view = winsaveview()
+    let l:pattern = '[0-9a-zA-Z_\.]\+\s*\(<-\|=\)\s*function\s*('
+    let l:start_line = search(l:pattern, 'bc')
+    if l:start_line == 0
+        let l:start_end = [0, 0]
+    else
+        normal! ^
+        call search('{')
+        normal! %
+        let l:end_line = line('.')
+        let l:start_end = [l:start_line, l:end_line]
+    endif
+    call winrestview(l:win_view)
+    return l:start_end
+endfunction
+
+"" Potential patterns for rmd and rnw chunks
+""  let l:pattern = '^```'
+""  let l:pattern = '^<<.*>>=\s*$'
+
+function! rook#text_object_rfunction()
+    let l:start_end = s:start_end_rfunction()
+    if !s:cursor_in_text_object(l:start_end)
+        echo 'Rook: cursor not inside an R function'
         let s:not_in_text_object = 1
         return
     else
-        "" save start and end positions of text object
-        if a:object ==# 'rfunction'
-            call search(l:pattern, 'bc')
-            normal! ^
-            let l:objstart = getpos('.')
-            call search('{')
-            normal! %
-            let l:objend = getpos('.')
-        elseif a:object ==# 'rmdchunk'
-            call search(l:pattern, 'bc')
-            normal! j^
-            let l:objstart = getpos('.')
-            call search(l:pattern)
-            normal! k$
-            let l:objend = getpos('.')
-        elseif a:object ==# 'sweavechunk'
-            call search(l:pattern, 'bc')
-            normal! j^
-            let l:objstart = getpos('.')
-            call search('^@')
-            normal! k$
-            let l:objend = getpos('.')
-        endif
-        "" check if cursor is inside found text object
-        if l:startpos[1] < l:objstart[1] || l:startpos[1] > l:objend[1]
-            echo 'Rook: cursor not inside '.a:object
-            call winrestview(l:win_view)
-            let s:not_in_text_object = 1
-            return
-        else
-            let s:not_in_text_object = 0
-            call setpos('.', l:objstart)
-            normal! v
-            call setpos('.', l:objend)
-        endif
+        execute 'normal! 'l:start_end[0].'GV'.l:start_end[1].'G'
     endif
 endfunction
 

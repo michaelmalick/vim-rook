@@ -13,12 +13,13 @@ COMMANDS                                                       *rook-commands*
 :Rattach [args]     Specify a target tmux pane or neovim terminal buffer to
                     evaluate code in. For tmux, the format of [args] needs to
                     be: `session_name:window_name.pane_index`  (e.g.,
-                    `sess:win.1`). For neovim [args] should be a buffer name.
-                    Tab completion can be used to specify the target. 
-                    When running neovim, `Rattach` assumes the target is a
-                    neovim terminal buffer (even if neovim is running inside
-                    tmux). When running vim, `Rattach` assumes the target is a
-                    tmux pane. This behaviour can be changed by setting the
+                    `sess:win.1`). For neovim, [args] should be a buffer name.
+                    Tab completion can be used to specify the target for both
+                    neovim and tmux targets. When running neovim, `Rattach`
+                    assumes the target is a neovim terminal buffer (even if
+                    neovim is running inside tmux). When running vim,
+                    `Rattach` assumes the target is a tmux pane. This
+                    behaviour can be changed by setting the
                     `g:rook_target_type` variable (see |rook-configurations|).
 
                     When the `Rattach` command is called, the attached target
@@ -26,13 +27,15 @@ COMMANDS                                                       *rook-commands*
                     pane/terminal can be specified for each R filetype buffer.
                     If only one unique target pane/terminal has been set, all
                     R filetype buffers will automatically be set to send to
-                    this target. If more than one unique target has been set
-                    (i.e., `Rattach` has been called at least twice with two
-                    different targets specified) then targets for all new R
-                    filetype buffers will need to be set manually by calling
-                    `Rattach`. The selected target for a buffer is remembered
-                    throughout the vim/neovim editing session and the buffer
-                    target can be changed by calling `Rattach` again. 
+                    this target (this inheritance occurs for vim buffers with
+                    file extensions `*.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw`). If
+                    more than one unique target has been set (i.e., `Rattach`
+                    has been called at least twice with two different targets
+                    specified) then targets for all new R filetype buffers
+                    will need to be set manually by calling `Rattach`. The
+                    selected target for a buffer is remembered throughout the
+                    vim/neovim editing session and the buffer target can be
+                    changed by calling `Rattach` again. 
                     
 :Rwrite [args]      Given an argument, take the text given in [args] and send
                     it to the target R console, e.g., `:Rwrite ls()` will send
@@ -73,6 +76,16 @@ COMMANDS                                                       *rook-commands*
 
 
 ==============================================================================
+GLOBAL PLUGIN                                                    *rook-global*
+
+Rook.vim is set up to be a global plugin because R code can appear in numerous
+filetypes (e.g., markdown, pandoc, rmd, rnw, latex). This means that the above
+commands are available in all vim filetypes. All rook.vim functions are lazy
+loaded, so there should be no startup penalty to having rook.vim installed if
+you don't use it for certain filetypes.
+
+
+==============================================================================
 MAPPINGS                                                       *rook-mappings*
 
 Rook does not provide any mappings. If you want to send code from a vim buffer
@@ -82,9 +95,9 @@ to the selected R console, add the following mappings to your .vimrc:
     nmap gl  <Plug>RookSend      " Send motion/text object
     nmap gll <Plug>RookSendLine  " Send current line
 
-To send the current line, use `gll`. Use `gl` followed by a
-motion to send the motion target, e.g., `glip` will send a paragraph. In
-visual mode, use `gl` to send the current selection.
+To send the current line, use `gll`. Use `gl` followed by a motion to send the
+motion target, e.g., `glip` will send a paragraph. In visual mode, use `gl` to
+send the current selection.
 
 If you want key mappings to evaluate frequently used commands (with path
 expansion), you can use the rook#send_text function. For example, the
@@ -92,6 +105,27 @@ following mapping will source the current file in the target R session:
 
     nnoremap <silent> <leader>rs :call 
         \ rook#send_text('source("' . expand('%:p') . '")')<CR>
+
+A text object for R functions is also provided. To map `af` to send an
+R function to the attached R session, add the following to your .vimrc:
+
+    xmap af <Plug>RookRFunctionVisual
+    omap af <Plug>RookRFunctionPending
+
+To send the R function the cursor is in, use `glaf`.
+
+Because rook.vim is defined as a global plugin, the above mappings would be
+avialable in all vim filetypes. If you want mappings to only be created for
+certain filetypes, use an |autocommand| in your .vimrc:
+
+    augroup rook_mappings
+        autocmd!
+        au FileType r,rmd,rnoweb xmap <buffer> af <Plug>RookRFunctionVisual
+        au FileType r,rmd,rnoweb omap <buffer> af <Plug>RookRFunctionPending
+    augroup END
+
+The above autocommand limits the function text object mappings to only be set
+for `r`, `rmd`, and `rnoweb` filetypes.
 
 
 ==============================================================================
@@ -141,7 +175,8 @@ starts with a `#` and ends with four consecutive `#`, `=`, or `-`.
 RStudio does not have nested folding, therefore, each of the three different
 syntaxes represent a level-1 fold within the file.
 
-When this variable is set to 0 (the default) the user defined default folding
+When set, RStudio style folding is limited to buffers with filetype=r. When
+this variable is set to 0 (the default) the user defined default folding
 method is used.
 
 

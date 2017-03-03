@@ -50,11 +50,17 @@ nnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(0)<CR>g@
 nnoremap <silent> <Plug>RookSendLine :<C-U>call rook#send_line()<Bar>
     \ exe 'norm! '.g:rook_count1.'g@_'<CR>
 
-augroup rook_plugin
+xnoremap <silent> <Plug>RookRFunctionVisual
+    \ :<C-U>call rook#text_object_rfunction()<CR>
+onoremap <silent> <Plug>RookRFunctionPending
+    \ :<C-U>call rook#text_object_rfunction()<CR>
+
+augroup rook_plugin_master
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
-    autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-        \ call rook#r_autocmd()
+    autocmd BufNewFile,BufRead * call rook#source_cmd()
+    "" only set rstudio-folding for r filetypes
+    autocmd FileType r call rook#fold_expr()
     "" on buffer entry set b:rook_target_id
     autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
         \ call rook#set_buffer_target_id()
