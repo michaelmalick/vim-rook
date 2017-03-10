@@ -60,5 +60,4 @@ To install, I recommend installing
 
 License
 =======
-Rook is [MIT/X11](http://opensource.org/licenses/MIT) licensed.
-
+MIT
