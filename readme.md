@@ -1,4 +1,4 @@
-rook.vim
+Rook.vim
 ========
 
 Lightweight plugin integrating R and vim/neovim.
@@ -38,6 +38,21 @@ nmap gll <Plug>RookSendLine  " Send current line
 To send the current line, use `gll`. Use `gl` followed by a
 motion to send the motion target, e.g., `glap` will send a paragraph. In visual
 mode, use `gl` to send the current selection.
+
+If you want to automate starting and attaching a new target R session in a
+split, you can use the `rook#rstart()` function. For example, the following will
+create an `:Rstart` command that will create and attach a new target in a
+horizontal split below the current buffer:
+
+```vim
+if has('nvim')
+    " neovim
+    command! Rstart call rook#rstart('belowright 25new')
+else
+    " tmux
+    command! Rstart call rook#rstart('tmux split-window -v -p 35')
+endif
+```
 
 If you want key mappings to evaluate frequently used commands (with path
 expansion), you can use the `rook#send_text` function. For example, the

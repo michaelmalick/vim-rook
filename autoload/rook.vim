@@ -32,6 +32,61 @@ function! rook#source_cmd()
     endif
 endfunction
 
+function! rook#get_active_tmux_pane_id()
+    let l:pane_id = system('tmux display-message -p "#{pane_id}"')
+    let l:pane_id = matchstr(l:pane_id, '%\d\+\ze')
+    return l:pane_id
+endfunction
+
+function! rook#get_active_tmux_window_id()
+    let l:window_id = system('tmux display-message -p "#{window_id}"')
+    let l:window_id = matchstr(l:window_id, '@\d\+\ze')
+    return l:window_id
+endfunction
+
+function! rook#get_active_tmux_session_id()
+    let l:session_id = system('tmux display-message -p "#{session_id}"')
+    let l:session_id = matchstr(l:session_id, '$\d\+\ze')
+    return l:session_id
+endfunction
+
+function! rook#rstart(new)
+    if g:rook_target_type ==# 'neovim'
+        let l:start_winid = win_getid()
+        exe a:new
+        let l:end_winid = win_getid()
+        if l:start_winid == l:end_winid
+            echohl WarningMsg
+            echo "Rook: command didn't create a new window"
+            echohl None
+            return
+        endif
+        exe 'enew'
+        let l:jobid = termopen('R')
+        call win_gotoid(l:start_winid)
+        let b:rook_target_id = l:jobid
+        call rook#attach_dict_add(b:rook_target_id)
+    else
+        let l:start_paneid = rook#get_active_tmux_pane_id()
+        let l:start_windowid = rook#get_active_tmux_window_id()
+        let l:start_sessionid = rook#get_active_tmux_session_id()
+        call system(a:new)
+        let l:target_paneid = rook#get_active_tmux_pane_id()
+        if l:start_paneid == l:target_paneid
+            echohl WarningMsg
+            echo "Rook: command didn't create a new pane"
+            echohl None
+            return
+        endif
+        call system('tmux select-session -t '.l:start_sessionid)
+        call system('tmux select-window -t '.l:start_windowid)
+        call system('tmux select-pane -t '.l:start_paneid)
+        let b:rook_target_id = l:target_paneid
+        call rook#attach_dict_add(b:rook_target_id)
+        call rook#send_text('R')
+    endif
+endfunction
+
 function! rook#send_line()
     let g:rook_count1 = v:count1
     call rook#save_view()

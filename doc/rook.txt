@@ -74,6 +74,24 @@ COMMANDS                                                       *rook-commands*
 :Rview              Given no arguments, the previous function supplied to
                     `:Rview` is used.
 
+Rook does not have a built-in command to create a new target R session in
+a split. If you want to automate starting and attaching a new target R session
+in a split, you can use the `rook#rstart()` function. For example, the
+following will create an `:Rstart` command that will create and attach a new
+target in a horizontal split below the current buffer:
+
+    if has('nvim')
+        " neovim
+        command! Rstart call rook#rstart('belowright 25new')
+    else
+        " tmux
+        command! Rstart call rook#rstart('tmux split-window -v -p 35')
+    endif
+
+In neovim, the argument supplied to the `rook#rstart()` function should create
+a new window, e.g., `new`, `vnew`, or `tabnew`. For tmux, the argument should
+create a new pane, e.g., `split-window`, or `new-window`.
+
 
 ==============================================================================
 GLOBAL PLUGIN                                                    *rook-global*
