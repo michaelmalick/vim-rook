@@ -154,12 +154,13 @@ You can change the following settings to control how Rook works.
 ------------------------------------------------------------------------------
 g:rook_target_type
 
-This variable identifies where the target R console is running and can be set
-to either 'tmux' or 'neovim'. By default, `g:rook_target_type` is set to
-'neovim' if neovim is being used and to 'tmux' otherwise. Manually setting
-this variable to 'tmux' requires the target console to be running in a tmux
-pane and setting it to 'neovim' requires the target console to be running in a
-neovim terminal buffer.
+By default, if you are running neovim, rook.vim assumes the target R console
+is a neovim terminal buffer (even if neovim is running inside tmux) and if you
+are running vim, the target is assumed to be running in a tmux pane. If you
+want to use a tmux pane as the target when running neovim, set this variable
+to 'tmux', e.g., put the following in you .vimrc file:
+
+    let g:rook_target_type = 'tmux'
 
 ------------------------------------------------------------------------------
 g:rook_tmp_file                          default: file output from tmpname()

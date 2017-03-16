@@ -26,7 +26,7 @@ endif
 
 if !exists('g:rook_target_type')
     if has('nvim')
-        let g:rook_target_type = 'neovim'
+        let g:rook_target_type = 'nvim'
     else
         let g:rook_target_type = 'tmux'
     endif

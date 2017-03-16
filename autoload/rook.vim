@@ -51,22 +51,7 @@ function! rook#get_active_tmux_session_id()
 endfunction
 
 function! rook#rstart(new)
-    if g:rook_target_type ==# 'neovim'
-        let l:start_winid = win_getid()
-        exe a:new
-        let l:end_winid = win_getid()
-        if l:start_winid == l:end_winid
-            echohl WarningMsg
-            echo "Rook: command didn't create a new window"
-            echohl None
-            return
-        endif
-        exe 'enew'
-        let l:jobid = termopen('R')
-        call win_gotoid(l:start_winid)
-        let b:rook_target_id = l:jobid
-        call rook#attach_dict_add(b:rook_target_id)
-    else
+    if g:rook_target_type ==# 'tmux'
         let l:start_paneid = rook#get_active_tmux_pane_id()
         let l:start_windowid = rook#get_active_tmux_window_id()
         let l:start_sessionid = rook#get_active_tmux_session_id()
@@ -84,6 +69,21 @@ function! rook#rstart(new)
         let b:rook_target_id = l:target_paneid
         call rook#attach_dict_add(b:rook_target_id)
         call rook#send_text('R')
+    elseif g:rook_target_type ==# 'nvim'
+        let l:start_winid = win_getid()
+        exe a:new
+        let l:end_winid = win_getid()
+        if l:start_winid == l:end_winid
+            echohl WarningMsg
+            echo "Rook: command didn't create a new window"
+            echohl None
+            return
+        endif
+        exe 'enew'
+        let l:jobid = termopen('R')
+        call win_gotoid(l:start_winid)
+        let b:rook_target_id = l:jobid
+        call rook#attach_dict_add(b:rook_target_id)
     endif
 endfunction
 
@@ -109,7 +109,7 @@ endfunction
 function! rook#completion_target(...)
     if g:rook_target_type ==# 'tmux'
         return system('tmux list-panes -F "#S:#W.#P" -a')
-    elseif g:rook_target_type ==# 'neovim'
+    elseif g:rook_target_type ==# 'nvim'
         let l:max_bufnr = bufnr('$')
         let l:bufname_list = []
         let l:c = 1
@@ -235,7 +235,7 @@ function! rook#command_rattach(selected)
             let b:rook_target_id = l:proposal_id
             call rook#attach_dict_add(b:rook_target_id)
         endif
-    elseif g:rook_target_type ==# 'neovim' " a:selected is a buffer name
+    elseif g:rook_target_type ==# 'nvim' " a:selected is a buffer name
         let l:bufnr = bufnr(a:selected)
         if !bufexists(l:bufnr)
             echohl WarningMsg
@@ -326,7 +326,7 @@ function! rook#send_text(text)
         " include the literal flag so Tmux keywords are not looked up
         call system("tmux send-keys -l -t " . b:rook_target_id . " " . l:send_text)
         call system("tmux send-keys -t " . b:rook_target_id . " " . "Enter")
-    elseif g:rook_target_type ==# 'neovim'
+    elseif g:rook_target_type ==# 'nvim'
         call jobsend(b:rook_target_id, [a:text, ""])
     endif
 endfunction
@@ -342,7 +342,7 @@ function! s:target_still_exists()
         else
             let l:out = 1
         endif
-    elseif g:rook_target_type ==# 'neovim'
+    elseif g:rook_target_type ==# 'nvim'
         let l:out = 1
         try
             let l:pid = jobpid(b:rook_target_id)
