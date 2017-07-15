@@ -158,10 +158,10 @@ function! rook#command_rhelp(function)
         if bufwinnr(l:rh_bufnr) != -1
             exe bufwinnr(l:rh_bufnr) . "wincmd w"
         else
-            exe 'belowright'.l:rh_bufnr.'sbuffer'
+            exe 'topleft'.l:rh_bufnr.'sbuffer'
         endif
     else
-        exe 'silent! belowright new '.l:rh_bufname
+        exe 'silent! topleft new '.l:rh_bufname
         let l:helpstr = 'help('.shellescape(l:func).
                       \ ', package='.l:package.')'
         exe 'read !Rscript -e "'.l:helpstr.'"'
