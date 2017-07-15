@@ -152,27 +152,58 @@ function! rook#command_rhelp(function)
         let l:package = split(l:word, '::')[0]
         let l:func    = split(l:word, '::')[1]
     endif
+    let l:helpstr = 'help('.shellescape(l:func).', package='.l:package.')'
     let l:rh_bufname = 'RH:'.l:word
-    if bufexists(l:rh_bufname) " if buffer exists switch to it
-        let l:rh_bufnr = bufnr(l:rh_bufname)
-        if bufwinnr(l:rh_bufnr) != -1
-            exe bufwinnr(l:rh_bufnr) . "wincmd w"
-        else
-            exe 'topleft'.l:rh_bufnr.'sbuffer'
-        endif
+    let l:rh_bufnr = bufnr(l:rh_bufname)
+    let l:rh_winnr = rook#rhelp_winnr()
+    "" rh_buf = current rhelp buffer name/number
+    "" rh_win = window with *any* rhelp file
+    let l:rh_buf_exists = bufexists(l:rh_bufname)
+    let l:rh_buf_visible = bufwinnr(l:rh_bufnr) != -1
+    let l:rh_win_visible = l:rh_winnr != -1
+    if l:rh_buf_exists && l:rh_buf_visible
+        exe bufwinnr(l:rh_bufnr) . "wincmd w"
+    elseif l:rh_buf_exists && l:rh_win_visible
+        exe  l:rh_winnr . "wincmd w"
+        exe l:rh_bufnr.'buffer'
+    elseif l:rh_buf_exists && !l:rh_win_visible
+        exe 'aboveleft '.l:rh_bufnr.'sbuffer'
+    elseif !l:rh_buf_exists && l:rh_win_visible
+        exe  l:rh_winnr . "wincmd w"
+        exe 'silent! edit '.l:rh_bufname
+        call rook#rhelp_buffer_setup(l:helpstr)
     else
-        exe 'silent! topleft new '.l:rh_bufname
-        set syntax=rhelp
-        set filetype=rhelp
-        let l:helpstr = 'help('.shellescape(l:func).
-                      \ ', package='.l:package.')'
-        exe 'read !Rscript -e "'.l:helpstr.'"'
-        exe 'silent! %s/_//g'
-        normal! gg
-        setlocal buftype=nofile
-        setlocal bufhidden=hide
-        setlocal noswapfile
-        setlocal nomodifiable
+        exe 'silent! aboveleft new '.l:rh_bufname
+        call rook#rhelp_buffer_setup(l:helpstr)
+    endif
+endfunction
+
+function! rook#rhelp_buffer_setup(helpstring)
+    "" Rhelp buffers are not associated with a file, i.e.,
+    "" a new buffer is created and text is read into the buffer.
+    "" This means that if the buffer is deleted (:bd) and
+    "" `bufhidden=hide` the help buffer becomes empty and unlisted.
+    "" Need to use `:bw` to wipe the buffer.
+    exe 'read !Rscript -e "'.a:helpstring.'"'
+    exe 'silent! %s/_//g'
+    normal! gg
+    setlocal syntax=rhelp
+    setlocal filetype=rhelp
+    setlocal buftype=nofile
+    setlocal bufhidden=hide
+    setlocal noswapfile
+    setlocal nomodifiable
+endfunction
+
+function! rook#rhelp_winnr()
+    "" Returns the first winnr with &ft=rhelp
+    "" Returns -1 if no buffers with &ft=rhelp are visible
+    let g:rh_buffers = filter(range(1, bufnr('$')), 'getbufvar(v:val, "&ft") ==# "rhelp"')
+    let l:rh_windows = filter(g:rh_buffers, 'bufwinnr(v:val) >= 0')
+    if empty(l:rh_windows)
+        return -1
+    else
+        return bufwinnr(l:rh_windows[0])
     endif
 endfunction
 
