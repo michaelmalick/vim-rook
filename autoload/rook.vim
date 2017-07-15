@@ -162,6 +162,8 @@ function! rook#command_rhelp(function)
         endif
     else
         exe 'silent! topleft new '.l:rh_bufname
+        set syntax=rhelp
+        set filetype=rhelp
         let l:helpstr = 'help('.shellescape(l:func).
                       \ ', package='.l:package.')'
         exe 'read !Rscript -e "'.l:helpstr.'"'
