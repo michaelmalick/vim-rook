@@ -190,9 +190,9 @@ function! rook#rhelp_buffer_setup(helpstring)
     setlocal syntax=rhelp
     setlocal filetype=rhelp
     setlocal buftype=nofile
-    setlocal bufhidden=hide
     setlocal noswapfile
     setlocal nomodifiable
+    setlocal nobuflisted
 endfunction
 
 function! rook#rhelp_winnr()
