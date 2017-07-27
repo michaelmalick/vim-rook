@@ -1,6 +1,6 @@
 " rook.vim - Evaluate R code in a tmux pane or neovim terminal
 " Author:   Michael Malick <malickmj@gmail.com>
-" Version:  1.2
+" Version:  1.3
 
 
 if exists('g:loaded_rook') || &cp || v:version < 700
