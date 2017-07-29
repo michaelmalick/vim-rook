@@ -140,7 +140,16 @@ endfunction
 
 function! rook#command_rhelp(function)
     if empty(a:function)
-        let l:word = expand("<cword>")
+        let l:cur_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
+        if l:cur_char ==# ':'
+            let l:win_view = winsaveview()
+            normal! Bv3e
+            let l:lword = s:rook_get_selection()
+            let l:word = join(l:lword)
+            call winrestview(l:win_view)
+        else
+            let l:word = expand("<cword>")
+        endif
     else
         let l:word = a:function
     endif

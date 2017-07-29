@@ -58,12 +58,16 @@ COMMANDS                                                       *rook-commands*
                     package, use `raster::image`. Tab completion of function
                     names is provided for most of the functions that are
                     distributed with R (e.g., functions in the base, MASS,
-                    graphics, and lattice packages). Tab completion of
-                    functions from packages not distributed with R (e.g.,
-                    ggplot, dplyr) is not provided.
+                    and graphics). Tab completion of functions from packages
+                    not distributed with R (e.g., ggplot, dplyr) is not
+                    provided.
 
 :Rhelp              Given no arguments, the word under the cursor is used to
-                    populate the `help()` function argument. 
+                    populate the `help()` function argument. If the cursor is
+                    over a `:` when `Rhelp` is called with no arguments,
+                    `Rhelp` assumes the cursor is in a `package::function`
+                    statement and will attempt to get help for `function` in
+                    `package`.
 
 :Rview[args]        Given an R function as [args], wrap the word under the
                     cursor in the [args] function name and evaluate it in the
