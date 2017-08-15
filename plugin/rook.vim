@@ -55,6 +55,15 @@ xnoremap <silent> <Plug>RookRFunctionVisual
 onoremap <silent> <Plug>RookRFunctionPending
     \ :<C-U>call rook#text_object_rfunction()<CR>
 
+xnoremap <silent> <Plug>RookRmdChunkVisualI
+    \ :<C-U>call rook#text_object_rmdchunk(1)<CR>
+onoremap <silent> <Plug>RookRmdChunkPendingI
+    \ :<C-U>call rook#text_object_rmdchunk(1)<CR>
+xnoremap <silent> <Plug>RookRmdChunkVisualA
+    \ :<C-U>call rook#text_object_rmdchunk(0)<CR>
+onoremap <silent> <Plug>RookRmdChunkPendingA
+    \ :<C-U>call rook#text_object_rmdchunk(0)<CR>
+
 augroup rook_plugin_master
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)

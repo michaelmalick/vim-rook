@@ -465,10 +465,6 @@ function! s:start_end_rfunction()
     return l:start_end
 endfunction
 
-"" Potential patterns for rmd and rnw chunks
-""  let l:pattern = '^```'
-""  let l:pattern = '^<<.*>>=\s*$'
-
 function! rook#text_object_rfunction()
     let l:start_end = s:start_end_rfunction()
     if !s:cursor_in_text_object(l:start_end)
@@ -480,6 +476,51 @@ function! rook#text_object_rfunction()
     endif
 endfunction
 
+function! s:start_end_rmdchunk(inner)
+    "" returns a list of start and end line numbers for
+    "" the previous function definition in the buffer,
+    "" [start_line, end_line]. If no previous function
+    "" is found, return [0, 0].
+    ""
+    "" a:inner should be 1 for operating on an 'inner' chunk and
+    "" 0 if operation should include beginning and ending ``` lines
+    let l:win_view = winsaveview()
+    let l:pattern = '^```{r'
+    let l:start_line = search(l:pattern, 'bc')
+    if l:start_line == 0
+        let l:start_end = [0, 0]
+    else
+        normal! ^
+        if a:inner
+            call search('{')
+            normal! %j^
+            let l:start_line = line('.')
+        endif
+        call search('^```')
+        if a:inner
+            normal! k^
+        endif
+        let l:end_line = line('.')
+        let l:start_end = [l:start_line, l:end_line]
+    endif
+    call winrestview(l:win_view)
+    return l:start_end
+endfunction
+
+"" Potential patterns for rmd and rnw chunks
+""  let l:pattern = '^```'
+""  let l:pattern = '^<<.*>>=\s*$'
+
+function! rook#text_object_rmdchunk(inner)
+    let l:start_end = s:start_end_rmdchunk(a:inner)
+    if !s:cursor_in_text_object(l:start_end)
+        echo 'Rook: cursor not inside a chunk'
+        let s:not_in_text_object = 1
+        return
+    else
+        execute 'normal! 'l:start_end[0].'GV'.l:start_end[1].'G'
+    endif
+endfunction
 
 "" Completion list taken from running:
 ""   library(MASS)

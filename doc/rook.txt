@@ -128,22 +128,46 @@ following mapping will source the current file in the target R session:
     nnoremap <silent> <leader>rs :call 
         \ rook#send_text('source("' . expand('%:p') . '")')<CR>
 
-A text object for R functions is also provided. To map `af` to send an
-R function to the attached R session, add the following to your .vimrc:
+
+==============================================================================
+TEXT OBJECTS                                               *rook-text-objects*
+
+Text objects for R functions and rmarkdown code chunks are available. The
+following <Plug> mappings allow operating on these text objects:
+
+<Plug>RookRFunctionVisual     "a function"
+<Plug>RookRFunctionPending    "a function"
+
+<Plug>RookRmdChunkVisualI     "inner chunk"
+<Plug>RookRmdChunkPendingI    "inner chunk"
+<Plug>RookRmdChunkVisualA     "a chunk"
+<Plug>RookRmdChunkPendingA    "a chunk"
+
+To map `af` to send an R function to the attached R session and map `ic` and
+`ac` to rmarkdown chunks, add the following to your .vimrc:
 
     xmap af <Plug>RookRFunctionVisual
     omap af <Plug>RookRFunctionPending
+    xmap <buffer> ic <Plug>RookRmdChunkVisualI 
+    omap <buffer> ic <Plug>RookRmdChunkPendingI
+    xmap <buffer> ac <Plug>RookRmdChunkVisualA 
+    omap <buffer> ac <Plug>RookRmdChunkPendingA
 
-To send the R function the cursor is in, use `glaf`.
+To send the R function the cursor is in, use `glaf`. To send all R code in an
+rmarkdown chunk use `glic`.
 
 Because rook.vim is defined as a global plugin, the above mappings would be
-avialable in all vim filetypes. If you want mappings to only be created for
+available in all vim filetypes. If you want mappings to only be created for
 certain filetypes, use an |autocommand| in your .vimrc:
 
     augroup rook_mappings
         autocmd!
         au FileType r,rmd,rnoweb xmap <buffer> af <Plug>RookRFunctionVisual
         au FileType r,rmd,rnoweb omap <buffer> af <Plug>RookRFunctionPending
+        au FileType rmd xmap <buffer> ic <Plug>RookRmdChunkVisualI
+        au FileType rmd omap <buffer> ic <Plug>RookRmdChunkPendingI
+        au FileType rmd xmap <buffer> ac <Plug>RookRmdChunkVisualA
+        au FileType rmd omap <buffer> ac <Plug>RookRmdChunkPendingA
     augroup END
 
 The above autocommand limits the function text object mappings to only be set
