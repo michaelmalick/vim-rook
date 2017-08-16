@@ -1,7 +1,6 @@
 " rook.vim - autoload functions
 " Author:   Michael Malick <malickmj@gmail.com>
 
-
 function! rook#rstudio_folding()
     "" RStudio doesn't have nested folding, i.e., the different markers
     "" at the end of the lines do not signify different fold levels
@@ -52,6 +51,12 @@ endfunction
 
 function! rook#rstart(new)
     if g:rook_target_type ==# 'tmux'
+        if !exists('$TMUX')
+            echohl WarningMsg
+            echo "Rook: vim isn't inside tmux, use :Rattach instead"
+            echohl None
+            return
+        endif
         let l:start_paneid = rook#get_active_tmux_pane_id()
         let l:start_windowid = rook#get_active_tmux_window_id()
         let l:start_sessionid = rook#get_active_tmux_session_id()
@@ -69,7 +74,7 @@ function! rook#rstart(new)
         let b:rook_target_id = l:target_paneid
         call rook#attach_dict_add(b:rook_target_id)
         call rook#send_text('R')
-    elseif g:rook_target_type ==# 'nvim'
+    elseif g:rook_target_type ==# 'vim'
         let l:start_winid = win_getid()
         exe a:new
         let l:end_winid = win_getid()
@@ -80,7 +85,11 @@ function! rook#rstart(new)
             return
         endif
         exe 'enew'
-        let l:jobid = termopen('R')
+        if has('nvim')
+            let l:jobid = termopen('R')
+        else
+            let l:jobid = term_start('R', {'curwin':1})
+        endif
         call win_gotoid(l:start_winid)
         let b:rook_target_id = l:jobid
         call rook#attach_dict_add(b:rook_target_id)
@@ -109,7 +118,7 @@ endfunction
 function! rook#completion_target(...)
     if g:rook_target_type ==# 'tmux'
         return system('tmux list-panes -F "#S:#W.#P" -a')
-    elseif g:rook_target_type ==# 'nvim'
+    elseif g:rook_target_type ==# 'vim'
         let l:max_bufnr = bufnr('$')
         let l:bufname_list = []
         let l:c = 1
@@ -235,6 +244,10 @@ function! rook#command_rwrite(line1, line2, commands)
 endfunction
 
 function! rook#attach_dict_add(value)
+    "" a:value should be:
+    ""  - vim: terminal buffer number
+    ""  - nvim: terminal job id
+    ""  - tmux: unique pane id (e.g., %1)
     let l:curr_bufnr = bufnr('%')
     let g:rook_attach_dict[l:curr_bufnr] = a:value
 endfunction
@@ -277,7 +290,7 @@ function! rook#command_rattach(selected)
             let b:rook_target_id = l:proposal_id
             call rook#attach_dict_add(b:rook_target_id)
         endif
-    elseif g:rook_target_type ==# 'nvim' " a:selected is a buffer name
+    elseif g:rook_target_type ==# 'vim' " a:selected is a buffer name
         let l:bufnr = bufnr(a:selected)
         if !bufexists(l:bufnr)
             echohl WarningMsg
@@ -285,8 +298,14 @@ function! rook#command_rattach(selected)
             echohl None
             return
         endif
-        let l:proposal_id = getbufvar(bufname(l:bufnr), 'terminal_job_id')
-        if empty(l:proposal_id)
+        if has('nvim')
+            let l:proposal_id = getbufvar(bufname(l:bufnr), 'terminal_job_id')
+            let l:status = l:proposal_id
+        else
+            let l:proposal_id = l:bufnr
+            let l:status = term_getstatus(l:proposal_id)
+        endif
+        if empty(l:proposal_id) || empty(l:status)
             echohl WarningMsg
             echo "Rook: no terminal running in selected buffer"
             echohl None
@@ -368,8 +387,12 @@ function! rook#send_text(text)
         " include the literal flag so Tmux keywords are not looked up
         call system("tmux send-keys -l -t " . b:rook_target_id . " " . l:send_text)
         call system("tmux send-keys -t " . b:rook_target_id . " " . "Enter")
-    elseif g:rook_target_type ==# 'nvim'
-        call jobsend(b:rook_target_id, [a:text, ""])
+    elseif g:rook_target_type ==# 'vim'
+        if has('nvim')
+            call jobsend(b:rook_target_id, [a:text, ""])
+        else
+            call term_sendkeys(b:rook_target_id, a:text."\n") " need double quotes here
+        endif
     endif
 endfunction
 
@@ -384,14 +407,21 @@ function! s:target_still_exists()
         else
             let l:out = 1
         endif
-    elseif g:rook_target_type ==# 'nvim'
+    elseif g:rook_target_type ==# 'vim'
         let l:out = 1
-        try
-            let l:pid = jobpid(b:rook_target_id)
-        catch /.*/
-            let l:out = 0
-            return
-        endtry
+        if has('nvim')
+            try
+                let l:pid = jobpid(b:rook_target_id)
+            catch /.*/
+                let l:out = 0
+                return
+            endtry
+        else
+            let l:status = term_getstatus(b:rook_target_id)
+            if empty(l:status)
+                let l:out = 0
+            endif
+        endif
     endif
     return l:out
 endfunction

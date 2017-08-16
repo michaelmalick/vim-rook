@@ -25,8 +25,8 @@ if !exists('g:rook_rstudio_folding')
 endif
 
 if !exists('g:rook_target_type')
-    if has('nvim')
-        let g:rook_target_type = 'nvim'
+    if has('nvim') || has('terminal')
+        let g:rook_target_type = 'vim'
     else
         let g:rook_target_type = 'tmux'
     endif
