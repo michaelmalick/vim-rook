@@ -13,7 +13,7 @@ if !exists('g:rook_attach_dict')
 endif
 
 if !exists('g:rook_tmp_file')
-    let g:rook_tmp_file = tempname()
+    let g:rook_tmp_file = substitute(tempname(), '\', '/', 'g')
 endif
 
 if !exists('g:rook_source_send')

@@ -171,6 +171,9 @@ function! rook#command_rhelp(function)
         let l:func    = split(l:word, '::')[1]
     endif
     let l:helpstr = 'help('.shellescape(l:func).', package='.l:package.')'
+    " Double and single quotes matter on next line:
+    "   'text' needs to be in single quotes
+    " let l:helpstr = "help(".shellescape(l:func).", package=".l:package.", help_type='text')"
     let l:rh_bufname = 'RH:'.l:word
     let l:rh_bufnr = bufnr(l:rh_bufname)
     let l:rh_winnr = rook#rhelp_winnr()
