@@ -132,6 +132,24 @@ function! rook#completion_target(...)
     endif
 endfunction
 
+function! rook#interact_rview()
+    let l:word = expand("<cword>")
+    if !exists('g:rook_rview_fun')
+        let g:rook_rview_fun = ''
+    endif
+    let l:input_text = 'Function: '
+    call inputsave()
+    let g:rook_rview_fun = input(l:input_text, g:rook_rview_fun)
+    call inputrestore()
+    let l:text = g:rook_rview_fun.'('.l:word.')'
+    if g:rook_rview_fun == ''
+        normal :<ESC>
+        return
+    endif
+    call rook#send_text(l:text)
+    normal :<ESC>
+endfunction
+
 function! rook#command_rview(function)
     let l:word = expand("<cword>")
     if !empty(a:function)
