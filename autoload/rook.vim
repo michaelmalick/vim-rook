@@ -150,19 +150,24 @@ function! rook#interact_rview()
     normal :<ESC>
 endfunction
 
+function! rook#completion_rview(...)
+    return join(g:rook_rview_complete, "\n")
+endfunction
+
 function! rook#command_rview(function)
     let l:word = expand("<cword>")
     if !empty(a:function)
         let g:rook_rview_fun = a:function
-        let l:text = a:function.'('.l:word.')'
-        call rook#send_text(l:text)
     elseif !exists('g:rook_rview_fun')
         echohl WarningMsg | echo "Rook: no previous function" | echohl None
         return
-    else
-        let l:text = g:rook_rview_fun.'('.l:word.')'
-        call rook#send_text(l:text)
     endif
+    let l:text = g:rook_rview_fun.'('.l:word.')'
+    call rook#send_text(l:text)
+    let l:tmp_lst = insert(g:rook_rview_complete, g:rook_rview_fun)
+    let l:tmp_lst = reverse(tmp_lst)
+    let l:tmp_lst = filter(copy(l:tmp_lst), 'index(l:tmp_lst, v:val, v:key+1)==-1')
+    let g:rook_rview_complete = reverse(l:tmp_lst)
 endfunction
 
 function! rook#command_rhelp(function)

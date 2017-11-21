@@ -32,6 +32,10 @@ if !exists('g:rook_target_type')
     endif
 endif
 
+if !exists('g:rook_rview_complete')
+    let g:rook_rview_complete = ["head"]
+endif
+
 "" The single space at the end of the command lines is necessary!!
 command! -nargs=1 -complete=custom,rook#completion_target Rattach 
     \:call rook#command_rattach(<q-args>)
@@ -42,7 +46,7 @@ command! -range -nargs=? Rwrite
 command! -nargs=? -complete=custom,rook#completion_rfunctions Rhelp 
     \:call rook#command_rhelp(<q-args>)
 
-command! -nargs=? -complete=custom,rook#completion_rfunctions Rview 
+command! -nargs=? -complete=custom,rook#completion_rview Rview 
     \:call rook#command_rview(<q-args>)
 
 xnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(1)<CR>

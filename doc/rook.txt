@@ -74,7 +74,7 @@ COMMANDS                                                       *rook-commands*
                     cursor in the [args] function name and evaluate it in the
                     target R console. For example `:Rview head` will send
                     `head(<cword>)` to be evaluated in R. Tab completion of
-                    function names is available.
+                    previously used `:Rview` [args] is available.
 
 :Rview              Given no arguments, the previous function supplied to
                     `:Rview` is used.
