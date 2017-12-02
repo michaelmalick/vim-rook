@@ -1,10 +1,11 @@
-*rook.txt* Evaluate R code in a tmux pane or neovim terminal
+*rook.txt* Evaluate R code in a vim/neovim terminal or a tmux pane
 
 
 ==============================================================================
 VIM-ROOK                                                            *vim-rook*
 
-Lightweight plugin for evaluating R code in a tmux pane or neovim terminal.
+Lightweight plugin for evaluating R code in a vim/neovim terminal or tmux
+pane.
 
 
 ==============================================================================
@@ -48,20 +49,20 @@ COMMANDS                                                       *rook-commands*
 :Rwrite             With neither a range or an argument, send the current line
                     to the target R console to be evaluated.
 
-:Rhelp[args]        Given an R function name as [args], split the current
-                    window and open the associated R help file in a new vim
-                    buffer. A new buffer is created for each unique function
-                    that is looked up. The command uses the R `help()`
-                    function with the `package` argument set to NULL. To get
-                    help for a function in a specific package, you can use the
-                    `::` notation; `package::function`. For example, to view
-                    the R help file for the `image` function in the `raster`
-                    package, use `raster::image`. Tab completion of function
-                    names is provided for most of the functions that are
-                    distributed with R (e.g., functions in the base and
-                    graphics). Tab completion of functions from packages
-                    not distributed with R (e.g., ggplot, dplyr) is not
-                    provided.
+:Rhelp[args]        Given an R function name as [args], open the R help file
+                    for the function given by [args]. The default is to open
+                    the 'html' help file, but a text based option is
+                    available (see `g:rook_help_type` in |rook-configurations|).
+                    The command uses the R `help()` function with the
+                    `package` argument set to NULL. To get help for a function
+                    in a specific package, you can use the `::` notation;
+                    `package::function`. For example, to view the R help file
+                    for the `image` function in the `raster` package, use
+                    `raster::image`. Tab completion of function names is
+                    provided for most of the functions that are distributed
+                    with R (e.g., functions in base and graphics). Tab
+                    completion of functions from packages not distributed with
+                    R (e.g., ggplot, dplyr) is not provided.
 
 :Rhelp              Given no arguments, the word under the cursor is used to
                     populate the `help()` function argument. If the cursor is
@@ -227,6 +228,22 @@ syntaxes represent a level-1 fold within the file.
 When set, RStudio style folding is limited to buffers with filetype=r. When
 this variable is set to 0 (the default) the user defined default folding
 method is used.
+
+------------------------------------------------------------------------------
+g:rook_help_type                                               default: html
+
+When set to 'html', R help files are opened in html format. Specifically, the
+R `help()` function is called with `help_type='html'`. When using html based
+help, the help file is looked up from inside the attached R console
+environment, therefore, help for functions available in that environment can
+be called without specifying a package.
+
+When set to 'text', the current window is split and the associated R help file
+is opened in a new vim buffer. A new buffer is created for each unique
+function that is looked up. When using text based help, the help file is
+looked up from outside the attached R console environment, therefore, help for
+functions not available in "base" R (i.e., the functions available when R
+first starts) is not available without explicitly specifying the package.
 
 
 ==============================================================================

@@ -33,8 +33,13 @@ if !exists('g:rook_target_type')
 endif
 
 if !exists('g:rook_rview_complete')
-    let g:rook_rview_complete = ["head"]
+    let g:rook_rview_complete = ['head']
 endif
+
+if !exists('g:rook_help_type')
+    let g:rook_help_type = 'html'
+endif
+
 
 "" The single space at the end of the command lines is necessary!!
 command! -nargs=1 -complete=custom,rook#completion_target Rattach 

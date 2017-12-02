@@ -193,32 +193,35 @@ function! rook#command_rhelp(function)
         let l:package = split(l:word, '::')[0]
         let l:func    = split(l:word, '::')[1]
     endif
-    let l:helpstr = 'help('.shellescape(l:func).', package='.l:package.')'
     " Double and single quotes matter on next line:
-    "   'text' needs to be in single quotes
-    " let l:helpstr = "help(".shellescape(l:func).", package=".l:package.", help_type='text')"
-    let l:rh_bufname = 'RH:'.l:word
-    let l:rh_bufnr = bufnr(l:rh_bufname)
-    let l:rh_winnr = rook#rhelp_winnr()
-    "" rh_buf = current rhelp buffer name/number
-    "" rh_win = window with *any* rhelp file
-    let l:rh_buf_exists = bufexists(l:rh_bufname)
-    let l:rh_buf_visible = bufwinnr(l:rh_bufnr) != -1
-    let l:rh_win_visible = l:rh_winnr != -1
-    if l:rh_buf_exists && l:rh_buf_visible
-        exe bufwinnr(l:rh_bufnr) . "wincmd w"
-    elseif l:rh_buf_exists && l:rh_win_visible
-        exe  l:rh_winnr . "wincmd w"
-        exe l:rh_bufnr.'buffer'
-    elseif l:rh_buf_exists && !l:rh_win_visible
-        exe 'aboveleft '.l:rh_bufnr.'sbuffer'
-    elseif !l:rh_buf_exists && l:rh_win_visible
-        exe  l:rh_winnr . "wincmd w"
-        exe 'silent! edit '.l:rh_bufname
-        call rook#rhelp_buffer_setup(l:helpstr)
-    else
-        exe 'silent! aboveleft new '.l:rh_bufname
-        call rook#rhelp_buffer_setup(l:helpstr)
+    "   'help_type' needs to be in single quotes
+    let l:helpstr = "help(".shellescape(l:func).", package=".l:package.", help_type='".g:rook_help_type."')"
+    if(g:rook_help_type ==# 'html')
+        call rook#send_text(l:helpstr)
+    elseif(g:rook_help_type ==# 'text')
+        let l:rh_bufname = 'RH:'.l:word
+        let l:rh_bufnr = bufnr(l:rh_bufname)
+        let l:rh_winnr = rook#rhelp_winnr()
+        "" rh_buf = current rhelp buffer name/number
+        "" rh_win = window with *any* rhelp file
+        let l:rh_buf_exists = bufexists(l:rh_bufname)
+        let l:rh_buf_visible = bufwinnr(l:rh_bufnr) != -1
+        let l:rh_win_visible = l:rh_winnr != -1
+        if l:rh_buf_exists && l:rh_buf_visible
+            exe bufwinnr(l:rh_bufnr) . "wincmd w"
+        elseif l:rh_buf_exists && l:rh_win_visible
+            exe  l:rh_winnr . "wincmd w"
+            exe l:rh_bufnr.'buffer'
+        elseif l:rh_buf_exists && !l:rh_win_visible
+            exe 'aboveleft '.l:rh_bufnr.'sbuffer'
+        elseif !l:rh_buf_exists && l:rh_win_visible
+            exe  l:rh_winnr . "wincmd w"
+            exe 'silent! edit '.l:rh_bufname
+            call rook#rhelp_buffer_setup(l:helpstr)
+        else
+            exe 'silent! aboveleft new '.l:rh_bufname
+            call rook#rhelp_buffer_setup(l:helpstr)
+        endif
     endif
 endfunction
 
