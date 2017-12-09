@@ -131,6 +131,16 @@ following mapping will source the current file in the target R session:
     nnoremap <silent> <leader>rs :call 
         \ rook#send_text('source("' . expand('%:p') . '")')<CR>
 
+If you want to call `:Rview` from a mapping, use:
+
+    nnoremap <silent> <leader>rv :call 
+        \ rook#interact_rview()<CR>
+
+If you want to get help for the function under the cursor from a mapping, use:
+
+    nnoremap <silent> <leader>rh :call 
+        \ rook#command_rhelp('')<CR>
+
 
 ==============================================================================
 TEXT OBJECTS                                               *rook-text-objects*
