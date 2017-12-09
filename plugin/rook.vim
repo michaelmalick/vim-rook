@@ -32,8 +32,8 @@ if !exists('g:rook_target_type')
     endif
 endif
 
-if !exists('g:rook_rview_complete')
-    let g:rook_rview_complete = ['head']
+if !exists('g:rook_rview_complete_list')
+    let g:rook_rview_complete_list = ['head']
 endif
 
 if !exists('g:rook_help_type')

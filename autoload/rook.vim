@@ -132,26 +132,16 @@ function! rook#completion_target(...)
     endif
 endfunction
 
-function! rook#interact_rview()
-    let l:word = expand("<cword>")
-    if !exists('g:rook_rview_fun')
-        let g:rook_rview_fun = ''
-    endif
-    let l:input_text = 'Function: '
-    call inputsave()
-    let g:rook_rview_fun = input(l:input_text, g:rook_rview_fun)
-    call inputrestore()
-    let l:text = g:rook_rview_fun.'('.l:word.')'
-    if g:rook_rview_fun == ''
-        normal :<ESC>
-        return
-    endif
-    call rook#send_text(l:text)
-    normal :<ESC>
+function! rook#completion_rview(...)
+    return join(g:rook_rview_complete_list, "\n")
 endfunction
 
-function! rook#completion_rview(...)
-    return join(g:rook_rview_complete, "\n")
+function! rook#rview_complete_add(function)
+    "" Add function to rview completion list
+    let l:tmp_lst = insert(g:rook_rview_complete_list, a:function)
+    let l:tmp_lst = reverse(tmp_lst)
+    let l:tmp_lst = filter(copy(l:tmp_lst), 'index(l:tmp_lst, v:val, v:key+1)==-1')
+    let g:rook_rview_complete_list = reverse(l:tmp_lst)
 endfunction
 
 function! rook#command_rview(function)
@@ -159,15 +149,31 @@ function! rook#command_rview(function)
     if !empty(a:function)
         let g:rook_rview_fun = a:function
     elseif !exists('g:rook_rview_fun')
-        echohl WarningMsg | echo "Rook: no previous function" | echohl None
+        echohl WarningMsg | echom "Rook: no previous function" | echohl None
         return
     endif
     let l:text = g:rook_rview_fun.'('.l:word.')'
     call rook#send_text(l:text)
-    let l:tmp_lst = insert(g:rook_rview_complete, g:rook_rview_fun)
-    let l:tmp_lst = reverse(tmp_lst)
-    let l:tmp_lst = filter(copy(l:tmp_lst), 'index(l:tmp_lst, v:val, v:key+1)==-1')
-    let g:rook_rview_complete = reverse(l:tmp_lst)
+    call rook#rview_complete_add(g:rook_rview_fun)
+endfunction
+
+function! rook#interact_rview()
+    let l:word = expand("<cword>")
+    if !exists('g:rook_rview_fun')
+        let g:rook_rview_fun = ''
+    endif
+    let l:input_text = 'Function: '
+    call inputsave()
+    let g:rook_rview_fun = input(l:input_text, g:rook_rview_fun, "custom,rook#completion_rview")
+    call inputrestore()
+    let l:text = g:rook_rview_fun.'('.l:word.')'
+    if g:rook_rview_fun == ''
+        normal :<ESC>
+        return
+    endif
+    normal :<ESC>
+    call rook#send_text(l:text)
+    call rook#rview_complete_add(g:rook_rview_fun)
 endfunction
 
 function! rook#command_rhelp(function)
