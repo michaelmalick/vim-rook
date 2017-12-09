@@ -53,7 +53,7 @@ function! rook#rstart(new)
     if g:rook_target_type ==# 'tmux'
         if !exists('$TMUX')
             echohl WarningMsg
-            echo "Rook: vim isn't inside tmux, use :Rattach instead"
+            echom "Rook: vim isn't inside tmux, use :Rattach instead"
             echohl None
             return
         endif
@@ -64,7 +64,7 @@ function! rook#rstart(new)
         let l:target_paneid = rook#get_active_tmux_pane_id()
         if l:start_paneid == l:target_paneid
             echohl WarningMsg
-            echo "Rook: command didn't create a new pane"
+            echom "Rook: command didn't create a new pane"
             echohl None
             return
         endif
@@ -80,7 +80,7 @@ function! rook#rstart(new)
         let l:end_winid = win_getid()
         if l:start_winid == l:end_winid
             echohl WarningMsg
-            echo "Rook: command didn't create a new window"
+            echom "Rook: command didn't create a new window"
             echohl None
             return
         endif
@@ -262,11 +262,11 @@ endfunction
 
 function! rook#command_rwrite(line1, line2, commands)
     if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
-        echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
         echohl WarningMsg
-        echo "Rook: attached target doesn't exist anymore"
+        echom "Rook: attached target doesn't exist anymore"
         echohl None
         return
     endif
@@ -313,12 +313,12 @@ function! rook#command_rattach(selected)
         let l:proposal_id = matchstr(l:paneslist, '%\d\+\ze '.a:selected.'\>')
         if empty(l:proposal_id)
             echohl WarningMsg
-            echo "Rook: ".a:selected." doesn't exist"
+            echom "Rook: ".a:selected." doesn't exist"
             echohl None
             return
         endif
         if l:proposal_id ==# $TMUX_PANE && !has('gui_running')
-            echohl WarningMsg | echo "Rook: can't attach own pane" | echohl None
+            echohl WarningMsg | echom "Rook: can't attach own pane" | echohl None
             return
         else
             "" set b:rook_target_id and add it to dict
@@ -329,7 +329,7 @@ function! rook#command_rattach(selected)
         let l:bufnr = bufnr(a:selected)
         if !bufexists(l:bufnr)
             echohl WarningMsg
-            echo "Rook: buffer ".a:selected." doesn't exist"
+            echom "Rook: buffer ".a:selected." doesn't exist"
             echohl None
             return
         endif
@@ -342,7 +342,7 @@ function! rook#command_rattach(selected)
         endif
         if empty(l:proposal_id) || empty(l:status)
             echohl WarningMsg
-            echo "Rook: no terminal running in selected buffer"
+            echom "Rook: no terminal running in selected buffer"
             echohl None
             return
         else
@@ -356,12 +356,12 @@ endfunction
 function! rook#opfunc(type, ...)
     " See :h g@
     if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
-        echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        echohl WarningMsg | echom "Rook: no target attached" | echohl None
         call s:rook_restore_view()
         return
     elseif !s:target_still_exists()
         echohl WarningMsg
-        echo "Rook: attached target doesn't exist anymore"
+        echom "Rook: attached target doesn't exist anymore"
         echohl None
         call s:rook_restore_view()
         return
@@ -385,11 +385,11 @@ endfunction
 
 function! rook#send_selection()
     if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
-        echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
         echohl WarningMsg
-        echo "Rook: attached target doesn't exist anymore"
+        echom "Rook: attached target doesn't exist anymore"
         echohl None
         return
     endif
@@ -409,11 +409,11 @@ endfunction
 
 function! rook#send_text(text)
     if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
-        echohl WarningMsg | echo "Rook: no target attached" | echohl None
+        echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
         echohl WarningMsg
-        echo "Rook: attached target doesn't exist anymore"
+        echom "Rook: attached target doesn't exist anymore"
         echohl None
         return
     endif
@@ -533,7 +533,7 @@ endfunction
 function! rook#text_object_rfunction()
     let l:start_end = s:start_end_rfunction()
     if !s:cursor_in_text_object(l:start_end)
-        echo 'Rook: cursor not inside an R function'
+        echom 'Rook: cursor not inside an R function'
         let s:not_in_text_object = 1
         return
     else
@@ -579,7 +579,7 @@ endfunction
 function! rook#text_object_rmdchunk(inner)
     let l:start_end = s:start_end_rmdchunk(a:inner)
     if !s:cursor_in_text_object(l:start_end)
-        echo 'Rook: cursor not inside a chunk'
+        echom 'Rook: cursor not inside a chunk'
         let s:not_in_text_object = 1
         return
     else
