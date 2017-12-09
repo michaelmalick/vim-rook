@@ -124,22 +124,20 @@ To send the current line, use `gll`. Use `gl` followed by a motion to send the
 motion target, e.g., `glip` will send a paragraph. In visual mode, use `gl` to
 send the current selection.
 
-If you want key mappings to evaluate frequently used commands (with path
-expansion), you can use the rook#send_text function. For example, the
-following mapping will source the current file in the target R session:
+Several common plugin actions are available for mapping:
 
-    nnoremap <silent> <leader>rs :call 
-        \ rook#send_text('source("' . expand('%:p') . '")')<CR>
+    nmap <leader>rs <Plug>RookSourceFile " Source the current file
+    nmap <leader>rw <Plug>RookSetwd      " setwd() to current directory
+    nmap <leader>rh <Plug>RookRhelp      " Get help for function under cursor
+    nmap <leader>ri <Plug>RookRview      " Interactive Rview call
 
-If you want to call `:Rview` from a mapping, use:
+More generally, if you want key mappings to evaluate frequently used commands
+(with path expansion), you can use the `rook#send_text` function. For example,
+the following mapping will render the current rmarkdown file in the target R
+session:
 
-    nnoremap <silent> <leader>rv :call 
-        \ rook#interact_rview()<CR>
-
-If you want to get help for the function under the cursor from a mapping, use:
-
-    nnoremap <silent> <leader>rh :call 
-        \ rook#command_rhelp('')<CR>
+    nnoremap <silent> <leader>rm :call 
+        \ rook#send_text('rmarkdown::render("' . expand('%:p') . '")')<CR>
 
 
 ==============================================================================

@@ -54,6 +54,13 @@ command! -nargs=? -complete=custom,rook#completion_rfunctions Rhelp
 command! -nargs=? -complete=custom,rook#completion_rview Rview 
     \:call rook#command_rview(<q-args>)
 
+nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
+nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview()<CR>
+nnoremap <silent> <Plug>RookSourceFile
+    \ :<C-U>call rook#send_text('source("' . expand('%:p') . '")')<CR>
+nnoremap <silent> <Plug>RookSetwd
+    \ :<C-U>call rook#send_text('setwd("' . expand('%:p:h') . '")')<CR>
+
 xnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(1)<CR>
 nnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(0)<CR>g@
 nnoremap <silent> <Plug>RookSendLine :<C-U>call rook#send_line()<Bar>
