@@ -1,0 +1,125 @@
+## Rook test suite
+
+Execute (Setup test environment):
+  " if !has('nvim')
+  "   set encoding=utf8
+  "   scriptencoding utf8
+  " endif
+
+  " xmap gl  <Plug>RookSend
+  " nmap gl  <Plug>RookSend
+  " nmap gll <Plug>RookSendLine
+
+  xmap af <Plug>RookRFunctionVisual
+  omap af <Plug>RookRFunctionPending
+  xmap ic <Plug>RookRmdChunkVisualI
+  omap ic <Plug>RookRmdChunkPendingI
+  xmap ac <Plug>RookRmdChunkVisualA
+  omap ac <Plug>RookRmdChunkPendingA
+
+
+
+## Basic tests ---------------------------------------------
+Execute (Autoload functions should not exist):
+  Assert !exists("*rook#rstudio_folding")
+  Assert !exists("*rook#fold_expr")
+
+Execute (Target dictionary should be empty):
+  Assert empty(g:rook_attach_dict)
+
+Execute (Target ID should not exist):
+  Assert !exists("b:rook_target_id")
+
+Execute (Help type should be html):
+  Assert g:rook_help_type ==# 'html'
+
+
+
+## Attach --------------------------------------------------
+Execute (Attach with empty input):
+  AssertThrows :Rattach
+  Assert !exists("b:rook_target_id")
+
+Execute (Attach non-existing buffer):
+  :Rattach test
+  Assert !exists("b:rook_target_id")
+
+# Execute (Start R):
+#   call rook#rstart('belowright vnew')
+#   Assert exists("b:rook_target_id")
+
+
+
+
+
+## Text objects --------------------------------------------
+
+## Function ####
+Given:
+  x <- function() {
+      return(10)
+  }
+Do (Operator change a function):
+  cafm
+Expect:
+  m
+Do (Visual change a function):
+  vafdim
+Expect:
+  m
+
+Given:
+  x <- function(y) {
+      y <- lapply(y, function(z) {
+               mean(z)
+           })
+  }
+Do (Operator change a function nested):
+  2jcafm
+Expect:
+  m
+
+Given:
+  x <- 10
+Do (Not in a function):
+  daf
+Expect:
+  x <- 10
+
+
+## Rmd chunk ####
+Given:
+  ```{r}
+  x <- function() {
+      return(10)
+  }
+  ```
+Do (Operator delete inner chunk):
+  jdic
+Expect:
+  ```{r}
+  ```
+Do (Visual delete inner chunk):
+  jvicd
+Expect:
+  ```{r}
+  ```
+Do (Operator change a chunk):
+  jcacm
+Expect:
+  m
+Do (Visual change a chunk):
+  jvaccm
+Expect:
+  m
+
+Given:
+  x <- 10
+Do (Not in a chunk):
+  dac
+Expect:
+  x <- 10
+Do (Not in inner chunk):
+  dic
+Expect:
+  x <- 10
