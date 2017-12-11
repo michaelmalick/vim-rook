@@ -54,6 +54,8 @@ command! -nargs=? -complete=custom,rook#completion_rfunctions Rhelp
 command! -nargs=? -complete=custom,rook#completion_rview Rview 
     \:call rook#command_rview(<q-args>)
 
+command! -bang -nargs=0 Rdetach call rook#command_detach(<bang>0)
+
 nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
 nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview()<CR>
 nnoremap <silent> <Plug>RookSourceFile

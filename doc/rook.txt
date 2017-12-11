@@ -80,6 +80,12 @@ COMMANDS                                                       *rook-commands*
 :Rview              Given no arguments, the previous function supplied to
                     `:Rview` is used.
 
+:Rdetach            Remove the buffer local target reference.
+
+:Rdetach!           Like `:Rdetach`, but also delete the target terminal
+                    buffer (bang has no effect if target is a tmux pane).
+                    
+
 Rook does not have a built-in command to create a new target R session in
 a split. If you want to automate starting and attaching a new target R session
 in a split, you can use the `rook#rstart()` function. For example, the

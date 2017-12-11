@@ -307,6 +307,44 @@ function! rook#set_buffer_target_id()
     endif
 endfunction
 
+function! rook#command_detach(bang)
+    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+        echohl WarningMsg | echom "Rook: no target attached" | echohl None
+        return
+    elseif !s:target_still_exists()
+        echohl WarningMsg
+        echom "Rook: attached target doesn't exist anymore"
+        echohl None
+        return
+    endif
+    if a:bang && g:rook_target_type ==# 'vim'
+        let l:target_bufnr = rook#get_target_bufnr(b:rook_target_id)
+        exe 'bd!'.l:target_bufnr
+    endif
+    call remove(g:rook_attach_dict, bufnr('%'))
+    let b:rook_target_id = 0
+endfunction
+
+function! rook#get_target_bufnr(target_id)
+    "" a:target_id should be b:rook_target_id
+    if has('nvim')
+        for i in range(1, bufnr('$'))
+            let l:id = getbufvar(i, 'terminal_job_id')
+            if l:id == a:target_id
+                let l:target_bufnr = i
+                return l:target_bufnr
+            else
+            endif
+        endfor
+        if !exists('l:target_bufnr')
+            let l:target_bufnr = 0
+            return l:target_bufnr
+        endif
+    else "" vim
+        return a:target_id
+    endif
+endfunction
+
 function! rook#command_rattach(selected)
     if g:rook_target_type ==# 'tmux'
         let l:paneslist = system('tmux list-panes -F "#D #S:#W.#P" -a')
