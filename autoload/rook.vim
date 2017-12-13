@@ -313,7 +313,7 @@ function! rook#set_buffer_target_id()
     endif
 endfunction
 
-function! rook#command_detach(bang)
+function! rook#command_rdetach(bang)
     if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
