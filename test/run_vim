@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd $(dirname $BASH_SOURCE)
+
+vim -Nu vader.vimrc +Vader*
+

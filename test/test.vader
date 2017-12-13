@@ -1,14 +1,10 @@
 ## Rook test suite
 
 Execute (Setup test environment):
-  " if !has('nvim')
-  "   set encoding=utf8
-  "   scriptencoding utf8
-  " endif
 
-  " xmap gl  <Plug>RookSend
-  " nmap gl  <Plug>RookSend
-  " nmap gll <Plug>RookSendLine
+  xmap gl  <Plug>RookSend
+  nmap gl  <Plug>RookSend
+  nmap gll <Plug>RookSendLine
 
   xmap af <Plug>RookRFunctionVisual
   omap af <Plug>RookRFunctionPending
@@ -17,44 +13,394 @@ Execute (Setup test environment):
   xmap ac <Plug>RookRmdChunkVisualA
   omap ac <Plug>RookRmdChunkPendingA
 
+  let g:rook_tmp_file = './rook.tmp'
 
 
 ## Basic tests ---------------------------------------------
 Execute (Autoload functions should not exist):
-  Assert !exists("*rook#rstudio_folding")
-  Assert !exists("*rook#fold_expr")
+  Assert !exists('*rook#rstudio_folding')
+  Assert !exists('*rook#fold_expr')
 
 Execute (Target dictionary should be empty):
   Assert empty(g:rook_attach_dict)
 
 Execute (Target ID should not exist):
-  Assert !exists("b:rook_target_id")
+  Assert !exists('b:rook_target_id')
 
 Execute (Help type should be html):
   Assert g:rook_help_type ==# 'html'
 
+Execute (Temp file shouldn't exist):
+  Assert !filereadable(g:rook_tmp_file)
 
 
 ## Attach --------------------------------------------------
-Execute (Attach with empty input):
+Execute (Rattach: empty input):
   AssertThrows :Rattach
-  Assert !exists("b:rook_target_id")
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
 
-Execute (Attach non-existing buffer):
-  :Rattach test
-  Assert !exists("b:rook_target_id")
+Execute (Rattach: non-existing buffer):
+  silent Rattach test
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
 
-# Execute (Start R):
-#   call rook#rstart('belowright vnew')
-#   Assert exists("b:rook_target_id")
+Execute (Rattach: non-terminal, non-R buffer):
+  silent edit test
+  silent Rattach test
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+
+Execute (Rattach: non-terminal, R buffer):
+  silent edit test1.R
+  silent Rattach test1.R
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+
+Execute (Rattach: terminal buffer (and Rdetach!)):
+  let s_winid = win_getid()
+  exe 'belowright new'
+  exe 'enew'
+  if has('nvim')
+    call termopen('R')
+  else
+    call term_start('R', {'curwin':1})
+  endif
+  let t_bufname = bufname('%')
+  call win_gotoid(s_winid)
+  silent edit test1.R
+  exe 'Rattach '.t_bufname
+  Assert exists('b:rook_target_id')
+  Assert !empty(g:rook_attach_dict)
+  AssertEqual 1, len(g:rook_attach_dict)
+  silent Rdetach!
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+
+Execute (Rattach: multiple attach to same R file):
+  let s_winid = win_getid()
+  exe 'belowright new'
+  exe 'enew'
+  if has('nvim')
+    call termopen('R')
+  else
+    call term_start('R', {'curwin':1})
+  endif
+  let t_bufname1 = bufname('%')
+  call win_gotoid(s_winid)
+  silent edit test1.R
+  exe 'Rattach '.t_bufname1
+  let t_id1 = b:rook_target_id
+  Assert exists('b:rook_target_id')
+  Assert !empty(g:rook_attach_dict)
+  AssertEqual 1, len(g:rook_attach_dict)
+  let s_winid = win_getid()
+  exe 'belowright new'
+  exe 'enew'
+  if has('nvim')
+    call termopen('R')
+  else
+    call term_start('R', {'curwin':1})
+  endif
+  let t_bufname2 = bufname('%')
+  call win_gotoid(s_winid)
+  exe 'Rattach '.t_bufname2
+  let t_id2 = b:rook_target_id
+  AssertEqual 1, len(g:rook_attach_dict)
+  AssertNotEqual t_id2, t_id1
+  silent Rdetach!
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+  exe 'bd!'.bufnr(t_bufname1)
+
+Execute (Rattach: auto-attach new R file):
+  let s_winid = win_getid()
+  exe 'belowright new'
+  exe 'enew'
+  if has('nvim')
+    call termopen('R')
+  else
+    call term_start('R', {'curwin':1})
+  endif
+  let t_bufname = bufname('%')
+  call win_gotoid(s_winid)
+  silent edit test1.R
+  exe 'Rattach '.t_bufname
+  let t_id = b:rook_target_id
+  silent edit test2.R
+  AssertEqual t_id, b:rook_target_id
+  AssertEqual 2, len(g:rook_attach_dict)
+  silent Rdetach
+  silent edit test1.R
+  silent Rdetach!
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+
+Execute (Rattach: no auto-attach new R file):
+  let g:rook_auto_attach = 0
+  let s_winid = win_getid()
+  exe 'belowright new'
+  exe 'enew'
+  if has('nvim')
+    call termopen('R')
+  else
+    call term_start('R', {'curwin':1})
+  endif
+  let t_bufname = bufname('%')
+  call win_gotoid(s_winid)
+  silent edit test1.R
+  exe 'Rattach '.t_bufname
+  silent edit test2.R
+  Assert !exists('b:rook_target_id')
+  AssertEqual 1, len(g:rook_attach_dict)
+  silent edit test1.R
+  silent Rdetach!
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+  let g:rook_auto_attach = 1
 
 
 
+## Rstart --------------------------------------------------
+Execute (Rstart: input doesn't create new window):
+  silent call rook#rstart(' ')
+  Assert !exists('b:rook_target_id')
+  Assert empty(g:rook_attach_dict)
+
+Execute (Rstart: create R target buffer):
+  call rook#rstart('belowright vnew')
+  Assert exists('b:rook_target_id')
+  Assert !empty(g:rook_attach_dict)
+  silent Rdetach!
+
+Execute (Rstart: create R target buffer for R file):
+  silent edit test1.R
+  call rook#rstart('belowright vnew')
+  Assert exists('b:rook_target_id')
+  Assert !empty(g:rook_attach_dict)
+  silent edit test1.R
+  silent Rdetach!
 
 
-## Text objects --------------------------------------------
 
-## Function ####
+## Rwrite --------------------------------------------------
+Execute (Rwrite: no target attached):
+  silent edit vader.R
+  silent Rwrite
+  Assert !filereadable(g:rook_tmp_file)
+
+Execute (Rwrite: send current line):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  silent Rwrite
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+Execute (Rwrite: send range):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  silent 1,3Rwrite
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  normal! G
+  let line2 = getline(line('.'))
+  AssertEqual 'ls()', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+Execute (Rwrite: send visual range):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  normal! vjj$
+  silent '<,'>Rwrite
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  normal! G
+  let line2 = getline(line('.'))
+  AssertEqual 'ls()', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+
+
+## Rview ---------------------------------------------------
+Execute (Rview: no target attached):
+  silent edit vader.R
+  let c_list = g:rook_rview_complete_list
+  silent Rview
+  Assert !exists('g:rook_rview_fun')
+  AssertEqual c_list, g:rook_rview_complete_list
+
+Execute (Rview: target attached but no previous function):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  let c_list = g:rook_rview_complete_list
+  silent Rview
+  Assert !exists('g:rook_rview_fun')
+  AssertEqual c_list, g:rook_rview_complete_list
+  silent edit vader.R
+  silent Rdetach!
+
+Execute (Rview: function arg):
+  silent edit vader.R
+  silent Rview str
+  Assert exists('g:rook_rview_fun')
+  AssertEqual 'str', g:rook_rview_fun
+  AssertEqual 'str', g:rook_rview_complete_list[0]
+
+
+
+## Rhelp ---------------------------------------------------
+Execute (Rhelp: text help):
+  let g:rook_help_type = 'text'
+  silent exe 'Rhelp lm'
+  Assert bufexists('RH:lm')
+  AssertEqual 'rhelp', &ft
+  normal! j
+  let cword = expand('<cword>')
+  AssertEqual 'lm', cword
+
+Execute (Rhelp: text help with :: notation):
+  let g:rook_help_type = 'text'
+  silent exe 'Rhelp stats::lm'
+  Assert bufexists('RH:stats::lm')
+  AssertEqual 'rhelp', &ft
+  normal! j
+  let cword = expand('<cword>')
+  AssertEqual 'lm', cword
+
+Execute (Rhelp: text help with :: notation under cursor):
+  let g:rook_help_type = 'text'
+  silent edit vader.R
+  normal! 4jf:
+  silent exe 'Rhelp'
+  Assert bufexists('RH:base::ls')
+  AssertEqual 'rhelp', &ft
+  normal! j
+  let cword = expand('<cword>')
+  AssertEqual 'ls', cword
+
+Execute (Rhelp: re-use same window):
+  let g:rook_help_type = 'text'
+  silent exe 'Rhelp lm'
+  let winid1 = win_getid()
+  silent exe 'Rhelp plot'
+  let winid2 = win_getid()
+  AssertEqual winid1, winid2
+  normal! j
+  let cword = expand('<cword>')
+  AssertEqual 'plot', cword
+
+
+
+## Sending w/ gl -------------------------------------------
+Execute (gl: no target attached):
+  silent edit vader.R
+  normal glap
+  Assert !filereadable(g:rook_tmp_file)
+
+Execute (gl: send line):
+  Assert !filereadable(g:rook_tmp_file)
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  let s_pos = getpos('.')
+  normal gll
+  let e_pos = getpos('.')
+  AssertEqual s_pos, e_pos
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  normal! G
+  let line2 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+Execute (gl: send word):
+  Assert !filereadable(g:rook_tmp_file)
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  let s_pos = getpos('.')
+  normal gliw
+  let e_pos = getpos('.')
+  AssertEqual s_pos, e_pos
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '##', line1
+  normal! G
+  let line2 = getline(line('.'))
+  AssertEqual '##', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+Execute (gl: send paragraph):
+  Assert !filereadable(g:rook_tmp_file)
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  let s_pos = getpos('.')
+  normal glap
+  let e_pos = getpos('.')
+  AssertEqual s_pos, e_pos
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  normal! 2j
+  let line2 = getline(line('.'))
+  AssertEqual 'ls()', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+Execute (gl: visual selection):
+  Assert !filereadable(g:rook_tmp_file)
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  normal V2jgl
+  Assert filereadable(g:rook_tmp_file)
+  exe 'edit '.g:rook_tmp_file
+  let line1 = getline(line('.'))
+  AssertEqual '## Test file for vader.vim', line1
+  normal! 2j
+  let line2 = getline(line('.'))
+  AssertEqual 'ls()', line2
+  silent edit vader.R
+  silent Rdetach!
+  call delete(g:rook_tmp_file)
+  exe 'bw!'.g:rook_tmp_file
+
+
+
+## Text object: function -----------------------------------
 Given:
   x <- function() {
       return(10)
@@ -87,7 +433,8 @@ Expect:
   x <- 10
 
 
-## Rmd chunk ####
+
+## Text object: rmd chunk ----------------------------------
 Given:
   ```{r}
   x <- function() {
@@ -123,3 +470,4 @@ Do (Not in inner chunk):
   dic
 Expect:
   x <- 10
+
