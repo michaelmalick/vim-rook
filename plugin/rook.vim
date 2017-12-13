@@ -40,6 +40,9 @@ if !exists('g:rook_help_type')
     let g:rook_help_type = 'html'
 endif
 
+if !exists('g:rook_auto_attach')
+    let g:rook_auto_attach = 1
+endif
 
 "" The single space at the end of the command lines is necessary!!
 command! -nargs=1 -complete=custom,rook#completion_target Rattach 
@@ -90,6 +93,6 @@ augroup rook_plugin_master
     autocmd FileType r call rook#fold_expr()
     "" on buffer entry set b:rook_target_id
     autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-        \ call rook#set_buffer_target_id()
+        \ call rook#auto_attach()
 augroup END
 

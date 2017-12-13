@@ -1,6 +1,13 @@
 " rook.vim - autoload functions
 " Author:   Michael Malick <malickmj@gmail.com>
 
+
+function! rook#auto_attach()
+    if g:rook_auto_attach == 1
+        call rook#set_buffer_target_id()
+    endif
+endfunction
+
 function! rook#rstudio_folding()
     "" RStudio doesn't have nested folding, i.e., the different markers
     "" at the end of the lines do not signify different fold levels

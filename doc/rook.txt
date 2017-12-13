@@ -30,14 +30,16 @@ COMMANDS                                                       *rook-commands*
                     If only one unique target pane/terminal has been set, all
                     R filetype buffers will automatically be set to send to
                     this target (this inheritance occurs for vim buffers with
-                    file extensions `*.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw`). If
-                    more than one unique target has been set (i.e., `Rattach`
-                    has been called at least twice with two different targets
-                    specified) then targets for all new R filetype buffers
-                    will need to be set manually by calling `Rattach`. The
-                    selected target for a buffer is remembered throughout the
-                    vim/neovim editing session and the buffer target can be
-                    changed by calling `Rattach` again. 
+                    file extensions `*.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw`). This
+                    auto-attaching can be turned off by setting the
+                    `g:rook_auto_attach` variable (see |rook-configurations|).
+                    If more than one unique target has been set (i.e.,
+                    `Rattach` has been called at least twice with two
+                    different targets specified) then targets for all new R
+                    filetype buffers will need to be set manually by calling
+                    `Rattach`. The selected target for a buffer is remembered
+                    throughout the vim/neovim editing session and the buffer
+                    target can be changed by calling `Rattach` again. 
                     
 :Rwrite [args]      Given an argument, take the text given in [args] and send
                     it to the target R console, e.g., `:Rwrite ls()` will send
@@ -258,6 +260,14 @@ function that is looked up. When using text based help, the help file is
 looked up from outside the attached R console environment, therefore, help for
 functions not available in "base" R (i.e., the functions available when R
 first starts) is not available without explicitly specifying the package.
+
+------------------------------------------------------------------------------
+g:rook_auto_attach                                                default: 1
+
+When set to 1, if only one R target is attached, all new vim buffers with file
+extensions `*.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw` will be auto-attached to the
+single existing target. If more than one target is attached, no auto-attaching
+occurs. Set to 0 to turn-off off auto-attaching.
 
 
 ==============================================================================
