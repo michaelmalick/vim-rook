@@ -261,7 +261,7 @@ function! rook#rhelp_winnr()
 endfunction
 
 function! rook#command_rwrite(line1, line2, commands)
-    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+    if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
@@ -295,20 +295,19 @@ function! rook#set_buffer_target_id()
     ""   if current buffer is listed in dict set b:rook_target_id to its value
     ""   if current buffer isn't listed in dict set b:rook_target_id = 0
         let b:rook_target_id = get(g:rook_attach_dict, l:curr_bufnr)
+        if b:rook_target_id == 0
+            unlet b:rook_target_id
+        endif
     elseif len(l:unique_targets) == 1
     "" if one unique target exists in dict set b:rook_target_id to
     "" the single unique target
         let b:rook_target_id = values(g:rook_attach_dict)[0]
         call rook#attach_dict_add(b:rook_target_id)
-    else
-    "" otherwise set b:rook_target = 0, indicating no target is associated
-    "" with the current buffer
-        let b:rook_target_id = 0
     endif
 endfunction
 
 function! rook#command_detach(bang)
-    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+    if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
@@ -322,7 +321,7 @@ function! rook#command_detach(bang)
         exe 'bd!'.l:target_bufnr
     endif
     call remove(g:rook_attach_dict, bufnr('%'))
-    let b:rook_target_id = 0
+    unlet b:rook_target_id
 endfunction
 
 function! rook#get_target_bufnr(target_id)
@@ -393,7 +392,7 @@ endfunction
 
 function! rook#opfunc(type, ...)
     " See :h g@
-    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+    if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         call s:rook_restore_view()
         return
@@ -422,7 +421,7 @@ function! rook#opfunc(type, ...)
 endfunction
 
 function! rook#send_selection()
-    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+    if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
@@ -446,7 +445,7 @@ function! rook#send_selection()
 endfunction
 
 function! rook#send_text(text)
-    if !exists('b:rook_target_id') || string(b:rook_target_id) ==# '0'
+    if !exists('b:rook_target_id')
         echohl WarningMsg | echom "Rook: no target attached" | echohl None
         return
     elseif !s:target_still_exists()
