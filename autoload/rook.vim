@@ -123,7 +123,7 @@ function! rook#completion_target(...)
         let l:bufname_list = []
         let l:c = 1
         while l:c <= l:max_bufnr
-            if bufexists(l:c) && buflisted(l:c)
+            if bufexists(l:c) && buflisted(l:c) && getbufvar(l:c, '&buftype') ==# 'terminal'
                 call add(l:bufname_list, bufname(l:c))
             endif
             let l:c += 1
@@ -240,8 +240,8 @@ function! rook#rhelp_buffer_setup(helpstring)
     exe 'read !Rscript -e "'.a:helpstring.'"'
     exe 'silent! %s/_//g'
     normal! gg
-    setlocal syntax=rhelp
     setlocal filetype=rhelp
+    setlocal syntax=rhelp
     setlocal buftype=nofile
     setlocal noswapfile
     setlocal nomodifiable
