@@ -1,4 +1,4 @@
-" rook.vim - Evaluate R code in a tmux pane or neovim terminal
+" rook.vim - Evaluate R code in a vim/neovim terminal or a tmux pane
 " Author:   Michael Malick <malickmj@gmail.com>
 " Version:  1.4
 
@@ -13,7 +13,7 @@ if !exists('g:rook_attach_dict')
 endif
 
 if !exists('g:rook_tmp_file')
-    let g:rook_tmp_file = substitute(tempname(), '\', '/', 'g')
+    let g:rook_tmp_file = tempname()
 endif
 
 if !exists('g:rook_source_send')
@@ -33,7 +33,7 @@ if !exists('g:rook_target_type')
 endif
 
 if !exists('g:rook_rview_complete_list')
-    let g:rook_rview_complete_list = ['head']
+    let g:rook_rview_complete_list = ['str']
 endif
 
 if !exists('g:rook_help_type')
@@ -62,9 +62,9 @@ command! -bang -nargs=0 Rdetach call rook#command_rdetach(<bang>0)
 nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
 nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview()<CR>
 nnoremap <silent> <Plug>RookSourceFile
-    \ :<C-U>call rook#send_text('source("' . expand('%:p') . '")')<CR>
+    \ :<C-U>call rook#send_text(rook#get_source_cmd(expand('%:p'), 0))<CR>
 nnoremap <silent> <Plug>RookSetwd
-    \ :<C-U>call rook#send_text('setwd("' . expand('%:p:h') . '")')<CR>
+    \ :<C-U>call rook#send_text('setwd("' . rook#win_path_fslash(expand('%:p:h')) . '")')<CR>
 
 xnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(1)<CR>
 nnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(0)<CR>g@
@@ -88,7 +88,7 @@ onoremap <silent> <Plug>RookRmdChunkPendingA
 augroup rook_plugin_master
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
-    autocmd BufNewFile,BufRead * call rook#source_cmd()
+    autocmd BufNewFile,BufRead * call rook#source_send()
     "" only set rstudio-folding for r filetypes
     autocmd FileType r call rook#fold_expr()
     "" on buffer entry set b:rook_target_id

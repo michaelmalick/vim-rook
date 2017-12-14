@@ -2,6 +2,11 @@
 " Author:   Michael Malick <malickmj@gmail.com>
 
 
+function! rook#win_path_fslash(path)
+    let l:esc = substitute(a:path, '\', '/', 'g')
+    return l:esc
+endfunction
+
 function! rook#auto_attach()
     if g:rook_auto_attach == 1
         call rook#set_buffer_target_id()
@@ -32,9 +37,23 @@ function! rook#fold_expr()
     endif
 endfunction
 
-function! rook#source_cmd()
+function! rook#get_source_cmd(fpath, echo)
+    let l:fpath = rook#win_path_fslash(a:fpath)
+    let l:args = [ ]
+    if &fileencoding ==# 'utf-8'
+        call add(l:args, 'encoding = "UTF-8"')
+    endif
+    if a:echo
+        call add(l:args, 'echo = TRUE')
+    endif
+    let l:args = join(l:args, ',')
+    let l:cmd = 'base::source("' . l:fpath . '",' . l:args . ')'
+    return l:cmd
+endfunction
+
+function! rook#source_send()
     if g:rook_source_send
-        let g:rook_source_command = 'source("' . g:rook_tmp_file . '" , echo = TRUE)'
+        let g:rook_source_send_command = rook#get_source_cmd(g:rook_tmp_file, 1)
     endif
 endfunction
 
@@ -440,8 +459,8 @@ function! rook#send_selection()
     call s:rook_save_selection()
     let l:start_line = line("'<")
     let l:end_line = line("'>")
-    if exists("g:rook_source_command") && l:start_line != l:end_line
-        call rook#send_text(g:rook_source_command)
+    if exists("g:rook_source_send_command") && l:start_line != l:end_line
+        call rook#send_text(g:rook_source_send_command)
     else
         let l:select_text = readfile(g:rook_tmp_file)
         for i in l:select_text
