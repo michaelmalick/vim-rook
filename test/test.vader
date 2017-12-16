@@ -268,6 +268,34 @@ Execute (Rview: function arg):
 
 
 
+## Rargs ---------------------------------------------------
+Execute (Rargs: no previous function):
+  silent edit vader.R
+  silent Rargs
+  Assert !exists('g:rook_rargs_fun')
+
+Execute (Rargs: target attached w/ input function):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  silent Rargs plot
+  AssertEqual 'plot', g:rook_rargs_fun
+  silent edit vader.R
+  silent Rdetach!
+
+Execute (Rargs: target attached w/o input function):
+  silent edit vader.R
+  call rook#rstart('belowright vnew')
+  silent edit vader.R
+  normal! 2j
+  silent Rargs
+  AssertEqual 'ls', g:rook_rargs_fun
+  normal! gg^
+  silent edit vader.R
+  silent Rdetach!
+
+
+
 ## Rhelp ---------------------------------------------------
 Execute (Rhelp: text help):
   let g:rook_help_type = 'text'

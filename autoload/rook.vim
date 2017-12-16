@@ -1,6 +1,35 @@
 " rook.vim - autoload functions
 " Author: Michael Malick <malickmj@gmail.com>
 
+function! rook#get_prev_function_name()
+    let l:win_view = winsaveview()
+    let l:pattern = '[0-9a-zA-Z:_\.]\+\s*\ze('
+    let l:sea = search(l:pattern, 'bcW')
+    if l:sea == 0
+        call winrestview(l:win_view)
+        return 0
+    endif
+    let l:line = getline(l:sea)
+    let l:matched_raw  = matchstr(l:line, l:pattern)
+    let l:matched_stripped = substitute(l:matched_raw, '^\s\+\|\s\+$', '', 'g')
+    call winrestview(l:win_view)
+    return l:matched_stripped
+endfunction
+
+function! rook#command_rargs(function)
+    if empty(a:function)
+        let l:fun = rook#get_prev_function_name()
+    else
+        let l:fun = a:function
+    endif
+    if string(l:fun) ==# '0'
+        call rook#warning_msg("Rook: no previous function found")
+        return
+    else
+        let g:rook_rargs_fun = l:fun
+    endif
+    call rook#send_text('args('.g:rook_rargs_fun.')')
+endfunction
 
 function! rook#warning_msg(message)
     echohl WarningMsg

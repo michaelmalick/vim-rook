@@ -86,6 +86,15 @@ COMMANDS                                                       *rook-commands*
 
 :Rdetach!           Like `:Rdetach`, but also delete the target terminal
                     buffer (bang has no effect if target is a tmux pane).
+
+:Rargs[args]        Given an R function name as [args], show the arguments of
+                    that function in the target R console using the R `args()`
+                    function.
+
+:Rargs              Given no arguments, search backwards from the cursor to
+                    find the previous function call (matches at the cursor are
+                    allowed) and populate the `name` argument of `args()`
+                    using that function.
                     
 
 Rook does not have a built-in command to create a new target R session in
@@ -138,6 +147,7 @@ Several common plugin actions are available for mapping:
     nmap <leader>rw <Plug>RookSetwd      " setwd() to current directory
     nmap <leader>rh <Plug>RookRhelp      " Get help for function under cursor
     nmap <leader>ri <Plug>RookRview      " Interactive Rview call
+    nmap <leader>ra <Plug>RookRargs      " Get arguments for function
 
 More generally, if you want key mappings to evaluate frequently used commands
 (with path expansion), you can use the `rook#send_text` function. For example,
