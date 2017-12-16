@@ -3,6 +3,16 @@ Rook.vim
 
 Lightweight plugin integrating R and vim/neovim.
 
+- 100% vim-script, no external dependencies
+- Use motions and text-objects for sending code to R
+- Run R in vim/neovim terminal or a tmux pane
+- Switch between multiple R instances
+
+
+
+Overview
+--------
+
 - `:Rattach` attaches a target R console to send and evaluate code in (with tab
   completion). Rook can attach to an R console running either in a tmux pane or
   a neovim terminal buffer. If you are in neovim, rook assumes the
@@ -16,7 +26,7 @@ Lightweight plugin integrating R and vim/neovim.
   sent, e.g., `:Rwrite ls()`, and given neither a range or an argument, the
   current line is sent.
 
-- `:Rhelp` opens an R help file in a new buffer for the given function name.
+- `:Rhelp` opens an R help file in an html browser for the given function name.
   Given no arguments, the word under the cursor is used. Tab completion for most
   functions distributed with R is provided.
 
@@ -24,7 +34,7 @@ Lightweight plugin integrating R and vim/neovim.
   function and evaluate the expression in R. This is useful to quickly view the
   `head()` or `tail()` of a data frame or the `args()` of a function. Given no
   arguments, the previous function supplied to `:Rview` is used. Tab completion
-  of function names works here also.
+  of previously called function names is available.
 
 If you want key mappings to send code from a vim buffer to the target R console,
 add the following to your .vimrc:
@@ -46,7 +56,7 @@ horizontal split below the current buffer:
 
 ```vim
 if has('nvim')
-    " neovim
+    " vim/neovim terminal
     command! Rstart call rook#rstart('belowright 25new')
 else
     " tmux
@@ -54,25 +64,43 @@ else
 endif
 ```
 
-If you want key mappings to evaluate frequently used commands (with path
-expansion), you can use the `rook#send_text` function. For example, the
-following mapping will source the current file in the target R console:
+Several common plugin actions are available for mapping:
 
 ```vim
-nnoremap <silent> <leader>rs :call
-    \ rook#send_text('source("' . expand('%:p') . '")')<CR>
+nmap <leader>rs <Plug>RookSourceFile " Source the current file
+nmap <leader>rw <Plug>RookSetwd      " setwd() to current directory
+nmap <leader>rh <Plug>RookRhelp      " Get help for function under cursor
+nmap <leader>ri <Plug>RookRview      " Interactive Rview call
 ```
+
+More generally, if you want key mappings to evaluate frequently used commands
+(with path expansion), you can use the `rook#send_text` function. For example,
+the following mapping will render the current R-markdown file in the target R
+session:
+
+```vim
+nnoremap <silent> <leader>rm :call
+    \ rook#send_text('rmarkdown::render("' . expand('%:p') . '")')<CR>
+```
+
+See
+[documentation](https://github.com/michaelmalick/vim-rook/blob/master/doc/rook.txt)
+for full suit of commands and configuration options.
+
 
 
 Installation
-============
-To install, I recommend installing
-[pathogen](https://github.com/tpope/vim-pathogen) and then simply run:
+------------
 
-    cd ~/.vim/bundle
-    git clone git://github.com/michaelmalick/vim-rook.git
+Use your favorite plugin manager. If you don't have one, I recommend
+[vim-plug](https://github.com/junegunn/vim-plug):
+
+```vim
+Plug 'michaelmalick/vim-rook'
+```
+
 
 
 License
-=======
+-------
 MIT
