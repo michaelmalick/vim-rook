@@ -66,12 +66,12 @@ COMMANDS                                                       *rook-commands*
                     completion of functions from packages not distributed with
                     R (e.g., ggplot, dplyr) is not provided.
 
-:Rhelp              Given no arguments, the word under the cursor is used to
-                    populate the `help()` function argument. If the cursor is
-                    over a `:` when `Rhelp` is called with no arguments,
-                    `Rhelp` assumes the cursor is in a `package::function`
-                    statement and will attempt to get help for `function` in
-                    `package`.
+:Rhelp              Given no arguments, search backwards from the cursor to
+                    find the previous R function call and populate the
+                    `help()` function argument using that function. If the
+                    cursor is over a function call, that function is used. If
+                    the search finds a function call with `::` notation, the
+                    package is also supplied to the `help()` call.
 
 :Rview[args]        Given an R function as [args], wrap the word under the
                     cursor in the [args] function name and evaluate it in the
@@ -92,9 +92,9 @@ COMMANDS                                                       *rook-commands*
                     function.
 
 :Rargs              Given no arguments, search backwards from the cursor to
-                    find the previous function call (matches at the cursor are
-                    allowed) and populate the `name` argument of `args()`
-                    using that function.
+                    find the previous R function call and populate the `name`
+                    argument of `args()` using that function. If the cursor is
+                    over a function call, that function is used.
                     
 
 Rook does not have a built-in command to create a new target R session in

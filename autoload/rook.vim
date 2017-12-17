@@ -234,15 +234,12 @@ endfunction
 
 function! rook#command_rhelp(function)
     if empty(a:function)
-        let l:cur_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
-        if l:cur_char ==# ':'
-            let l:win_view = winsaveview()
-            normal! Bv3e
-            let l:lword = s:rook_get_selection()
-            let l:word = join(l:lword)
-            call winrestview(l:win_view)
-        else
-            let l:word = expand("<cword>")
+        if empty(a:function)
+            let l:word = rook#get_prev_function_name()
+        endif
+        if string(l:word) ==# '0'
+            call rook#warning_msg("Rook: no previous function found")
+            return
         endif
     else
         let l:word = a:function
@@ -257,7 +254,7 @@ function! rook#command_rhelp(function)
     endif
     " Double and single quotes matter on next line:
     "   'help_type' needs to be in single quotes
-    let l:helpstr = "help(".shellescape(l:func).", package=".l:package.", help_type='".g:rook_help_type."')"
+    let l:helpstr = "utils::help(".shellescape(l:func).", package=".l:package.", help_type='".g:rook_help_type."')"
     if(g:rook_help_type ==# 'html')
         call rook#send_text(l:helpstr)
     elseif(g:rook_help_type ==# 'text')
