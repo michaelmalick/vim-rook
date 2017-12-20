@@ -27,8 +27,8 @@ Overview
   current line is sent.
 
 - `:Rhelp` opens an R help file in an html browser for the given function name.
-  Given no arguments, the word under the cursor is used. Tab completion for most
-  functions distributed with R is provided.
+  Given no arguments, the previous R function in the script is used. Tab
+  completion for most functions distributed with R is provided.
 
 - `:Rview` Given a function name, wrap the word under the cursor in the supplied
   function and evaluate the expression in R. This is useful to quickly view the

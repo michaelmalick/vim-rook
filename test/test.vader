@@ -296,49 +296,6 @@ Execute (Rargs: target attached w/o input function):
 
 
 
-## Rhelp ---------------------------------------------------
-Execute (Rhelp: text help):
-  let g:rook_help_type = 'text'
-  silent exe 'Rhelp lm'
-  Assert bufexists('RH:lm')
-  AssertEqual 'rhelp', &ft
-  normal! j
-  let cword = expand('<cword>')
-  AssertEqual 'lm', cword
-
-Execute (Rhelp: text help with :: notation):
-  let g:rook_help_type = 'text'
-  silent exe 'Rhelp stats::lm'
-  Assert bufexists('RH:stats::lm')
-  AssertEqual 'rhelp', &ft
-  normal! j
-  let cword = expand('<cword>')
-  AssertEqual 'lm', cword
-
-Execute (Rhelp: text help with :: notation under cursor):
-  let g:rook_help_type = 'text'
-  silent edit vader.R
-  normal! 4jf:
-  silent exe 'Rhelp'
-  Assert bufexists('RH:base::ls')
-  AssertEqual 'rhelp', &ft
-  normal! j
-  let cword = expand('<cword>')
-  AssertEqual 'ls', cword
-
-Execute (Rhelp: re-use same window):
-  let g:rook_help_type = 'text'
-  silent exe 'Rhelp lm'
-  let winid1 = win_getid()
-  silent exe 'Rhelp plot'
-  let winid2 = win_getid()
-  AssertEqual winid1, winid2
-  normal! j
-  let cword = expand('<cword>')
-  AssertEqual 'plot', cword
-
-
-
 ## Sending w/ gl -------------------------------------------
 Execute (gl: no target attached):
   silent edit vader.R

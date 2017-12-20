@@ -259,17 +259,14 @@ method is used.
 g:rook_help_type                                               default: html
 
 When set to 'html', R help files are opened in html format. Specifically, the
-R `help()` function is called with `help_type='html'`. When using html based
-help, the help file is looked up from inside the attached R console
-environment, therefore, help for functions available in that environment can
-be called without specifying a package.
+R `help()` function is called with `help_type='html'`.
 
-When set to 'text', the current window is split and the associated R help file
-is opened in a new vim buffer. A new buffer is created for each unique
-function that is looked up. When using text based help, the help file is
-looked up from outside the attached R console environment, therefore, help for
-functions not available in "base" R (i.e., the functions available when R
-first starts) is not available without explicitly specifying the package.
+When set to 'text', the text based R help file is opened from the target R
+console, i.e., the R `help()` function is called with `help_type='text'`.
+
+When using html or text based help, the help file is looked up from inside the
+attached R console environment, therefore, help for functions available in
+that environment can be called without specifying a package.
 
 ------------------------------------------------------------------------------
 g:rook_auto_attach                                                default: 1

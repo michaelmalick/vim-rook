@@ -232,14 +232,14 @@ function! rook#interact_rview()
     call rook#rview_complete_add(g:rook_rview_fun)
 endfunction
 
-function! rook#get_help_call_html(function)
+function! rook#get_help_call(function)
     if empty(a:function)
         if empty(a:function)
             let l:word = rook#get_prev_function_name()
         endif
         if string(l:word) ==# '0'
             call rook#warning_msg("Rook: no previous function found")
-            return
+            return -1
         endif
     else
         let l:word = a:function
@@ -247,10 +247,14 @@ function! rook#get_help_call_html(function)
     let l:func_pack = rook#parse_function_name(l:word)
     let l:func = l:func_pack[0]
     let l:package = l:func_pack[1]
+    if match(['html', 'text'], g:rook_help_type) == -1
+        call rook#warning_msg("Rook: g:rook_help_type not set to 'html' or 'text'")
+        return -1
+    endif
     " Double and single quotes matter on next line:
     "   'help_type' needs to be in single quotes
-    let l:help_call_html = "utils::help(".shellescape(l:func).", package=".l:package.", help_type='".g:rook_help_type."')"
-    return l:help_call_html
+    let l:help_call = "utils::help(".shellescape(l:func).", package=".l:package.", help_type='".g:rook_help_type."')"
+    return l:help_call
 endfunction
 
 function! rook#parse_function_name(string)
@@ -278,87 +282,11 @@ function! rook#command_rhelp(function_input)
     let l:function_package = rook#parse_function_name(l:function_found)
     let l:function = l:function_package[0]
     let l:package = l:function_package[1]
-    let l:help_call_html = rook#get_help_call_html(l:function_found)
-    if(g:rook_help_type ==# 'html')
-        call rook#send_text(l:help_call_html)
-    elseif(g:rook_help_type ==# 'text')
-        let l:rh_bufname = 'RH:'.l:function_found
-        let l:rh_bufnr = bufnr(l:rh_bufname)
-        let l:rh_winnr = rook#rhelp_winnr()
-        "" rh_buf = current rhelp buffer name/number
-        "" rh_win = window with *any* rhelp file
-        let l:rh_buf_exists = bufexists(l:rh_bufname)
-        let l:rh_buf_visible = bufwinnr(l:rh_bufnr) != -1
-        let l:rh_win_visible = l:rh_winnr != -1
-        if l:rh_buf_exists && l:rh_buf_visible
-            exe bufwinnr(l:rh_bufnr) . "wincmd w"
-        elseif l:rh_buf_exists && l:rh_win_visible
-            exe  l:rh_winnr . "wincmd w"
-            exe l:rh_bufnr.'buffer'
-        elseif l:rh_buf_exists && !l:rh_win_visible
-            exe 'aboveleft '.l:rh_bufnr.'sbuffer'
-        elseif !l:rh_buf_exists && l:rh_win_visible
-            call rook#rhelp_make_text_call(l:help_call_html, l:package)
-            if !filereadable(s:help_tmp_file)
-                call rook#warning_msg("Rook: no help file found")
-                return
-            endif
-            exe  l:rh_winnr . "wincmd w"
-            exe 'silent! edit '.l:rh_bufname
-            call rook#rhelp_buffer_setup(l:help_call_html)
-        else
-            call rook#rhelp_make_text_call(l:help_call_html, l:package)
-            if !filereadable(s:help_tmp_file)
-                call rook#warning_msg("Rook: no help file found")
-                return
-            endif
-            exe 'silent! aboveleft new '.l:rh_bufname
-            call rook#rhelp_buffer_setup(l:help_call_html)
-        endif
-    endif
-endfunction
-
-function! rook#rhelp_make_text_call(help_call_html, package)
-    let s:help_tmp_file = rook#win_path_fslash(tempname())
-    if a:package ==# 'NULL'
-        let l:package = ' '
+    let l:help_call = rook#get_help_call(l:function_found)
+    if l:help_call == -1
+        return
     else
-        let l:package = a:package
-    endif
-    let l:call = "tools::Rd2txt(utils:::.getHelpFile(as.character(if(length(".a:help_call_html.") > 1) stop('More than one function, need to specify package', call. = FALSE) else ".a:help_call_html.")), out ='".s:help_tmp_file."', package = '".l:package."')"
-    " let l:call = "tools::Rd2txt(utils:::.getHelpFile(as.character(".a:help_call_html.")), out ='".s:help_tmp_file."', package = '".l:package."')"
-    call rook#send_text(l:call)
-    exe 'sleep 500m'
-endfunction
-
-function! rook#rhelp_buffer_setup(help_call_html)
-    "" Rhelp buffers are not associated with a file, i.e.,
-    "" a new buffer is created and text is read into the buffer.
-    "" This means that if the buffer is deleted (:bd) and
-    "" `bufhidden=hide` the help buffer becomes empty and unlisted.
-    "" Need to use `:bw` to wipe the buffer.
-    " exe 'read !Rscript -e "'.a:help_call_html.'"'
-    exe 'read '.s:help_tmp_file
-    exe 'silent! %s/_//g'
-    normal! gg
-    setlocal filetype=rhelp
-    setlocal syntax=rhelp
-    setlocal buftype=nofile
-    setlocal noswapfile
-    setlocal nomodifiable
-    setlocal nobuflisted
-    call delete(s:help_tmp_file)
-endfunction
-
-function! rook#rhelp_winnr()
-    "" Returns the first winnr with &ft=rhelp
-    "" Returns -1 if no buffers with &ft=rhelp are visible
-    let g:rh_buffers = filter(range(1, bufnr('$')), 'getbufvar(v:val, "&ft") ==# "rhelp"')
-    let l:rh_windows = filter(g:rh_buffers, 'bufwinnr(v:val) >= 0')
-    if empty(l:rh_windows)
-        return -1
-    else
-        return bufwinnr(l:rh_windows[0])
+        call rook#send_text(l:help_call)
     endif
 endfunction
 
