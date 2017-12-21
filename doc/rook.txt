@@ -85,7 +85,9 @@ COMMANDS                                                       *rook-commands*
 :Rdetach            Remove the buffer local target reference.
 
 :Rdetach!           Like `:Rdetach`, but also delete the target terminal
-                    buffer (bang has no effect if target is a tmux pane).
+                    buffer (bang has no effect if target is a tmux pane). 
+                    The target references for all vim buffers attached to the
+                    target will also be removed.
 
 :Rargs[args]        Given an R function name as [args], show the arguments of
                     that function in the target R console using the R `args()`

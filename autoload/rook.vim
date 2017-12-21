@@ -321,7 +321,7 @@ function! rook#set_buffer_target_id()
     if len(l:unique_targets) > 1
     "" if more than one unique target exists in dict &&
     ""   if current buffer is listed in dict set b:rook_target_id to its value
-    ""   if current buffer isn't listed in dict set b:rook_target_id = 0
+    ""   if current buffer isn't listed in dict don't set b:rook_target_id
         let b:rook_target_id = get(g:rook_attach_dict, l:curr_bufnr)
         if b:rook_target_id == 0
             unlet b:rook_target_id
@@ -342,11 +342,22 @@ function! rook#command_rdetach(bang)
         call rook#warning_msg("Rook: attached target doesn't exist anymore")
         return
     endif
+    let l:target_id = b:rook_target_id
+    let l:target_bufnr = rook#get_target_bufnr(l:target_id)
     if a:bang && g:rook_target_type ==# 'vim'
-        let l:target_bufnr = rook#get_target_bufnr(b:rook_target_id)
+        "" remove target in dict for all buffers
+        "" this allows auto-attaching again if
+        "" only one target exists
+        for i in range(1, bufnr('$'))
+            let l:id = getbufvar(i, 'rook_target_id')
+            if !empty(l:id) && l:id == l:target_id
+                call remove(g:rook_attach_dict, i)
+            endif
+        endfor
         exe 'bd!'.l:target_bufnr
+    else
+        call remove(g:rook_attach_dict, bufnr('%'))
     endif
-    call remove(g:rook_attach_dict, bufnr('%'))
     unlet b:rook_target_id
 endfunction
 
