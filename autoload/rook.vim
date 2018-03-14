@@ -73,7 +73,7 @@ function! rook#fold_expr()
     endif
 endfunction
 
-function! rook#get_source_cmd(fpath, echo)
+function! rook#get_source_cmd(fpath, echo, local)
     let l:fpath = rook#win_path_fslash(a:fpath)
     let l:args = [ ]
     if &fileencoding ==# 'utf-8'
@@ -465,7 +465,7 @@ function! rook#send_selection()
     call s:rook_save_selection()
     let l:start_line = line("'<")
     let l:end_line = line("'>")
-    if exists("g:rook_source_send_command") && l:start_line != l:end_line
+    if g:rook_source_send && l:start_line != l:end_line
         call rook#send_text(g:rook_source_send_command)
     else
         let l:select_text = readfile(g:rook_tmp_file)
