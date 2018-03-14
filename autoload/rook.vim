@@ -82,6 +82,9 @@ function! rook#get_source_cmd(fpath, echo)
     if a:echo
         call add(l:args, 'echo = TRUE')
     endif
+    if a:local
+        call add(l:args, 'local = TRUE')
+    endif
     let l:args = join(l:args, ',')
     let l:cmd = 'base::source("' . l:fpath . '",' . l:args . ')'
     return l:cmd
@@ -89,7 +92,7 @@ endfunction
 
 function! rook#source_send()
     if g:rook_source_send
-        let g:rook_source_send_command = rook#get_source_cmd(g:rook_tmp_file, 1)
+        let g:rook_source_send_command = rook#get_source_cmd(g:rook_tmp_file, 1, 1)
     endif
 endfunction
 
