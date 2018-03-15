@@ -64,7 +64,7 @@ nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
 nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview()<CR>
 nnoremap <silent> <Plug>RookRargs :<C-U>call rook#command_rargs('')<CR>
 nnoremap <silent> <Plug>RookSourceFile
-    \ :<C-U>call rook#send_text(rook#get_source_cmd(expand('%:p'), 0))<CR>
+    \ :<C-U>call rook#send_text(rook#get_source_cmd(expand('%:p'), 0, 1))<CR>
 nnoremap <silent> <Plug>RookSetwd
     \ :<C-U>call rook#send_text('setwd("' . rook#win_path_fslash(expand('%:p:h')) . '")')<CR>
 
