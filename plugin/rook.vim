@@ -44,6 +44,10 @@ if !exists('g:rook_auto_attach')
     let g:rook_auto_attach = 1
 endif
 
+if !exists('g:rook_nest_folds')
+    let g:rook_nest_folds = 0
+endif
+
 "" The single space at the end of the command lines is necessary!!
 command! -nargs=1 -complete=custom,rook#completion_target Rattach 
     \:call rook#command_rattach(<q-args>)

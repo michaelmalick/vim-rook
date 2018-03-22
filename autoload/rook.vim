@@ -52,17 +52,28 @@ endfunction
 function! rook#rstudio_folding()
     "" RStudio doesn't have nested folding, i.e., the different markers
     "" at the end of the lines do not signify different fold levels
+    if(g:rook_nest_folds)
+        let l:lev1 = ">1"
+        let l:lev2 = ">2"
+        let l:lev3 = ">3"
+    else
+        let l:lev1 = ">1"
+        let l:lev2 = ">1"
+        let l:lev3 = ">1"
+    endif
+
     let h1 = matchstr(getline(v:lnum), '^#.*#\{4}$')
     let h2 = matchstr(getline(v:lnum), '^#.*=\{4}$')
     let h3 = matchstr(getline(v:lnum), '^#.*-\{4}$')
+
     if empty(h1) && empty(h2) && empty(h3)
         return "="
     elseif !empty(h1)
-        return ">1"
+        return l:lev1
     elseif !empty(h2)
-        return ">1"
+        return l:lev2
     elseif !empty(h3)
-        return ">1"
+        return l:lev3
     endif
 endfunction
 

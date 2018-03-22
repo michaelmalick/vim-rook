@@ -251,11 +251,27 @@ starts with a `#` and ends with four consecutive `#`, `=`, or `-`.
 `# syntax 3 ----`
 
 RStudio does not have nested folding, therefore, each of the three different
-syntaxes represent a level-1 fold within the file.
+syntaxes represent a level-1 fold within the file (but see
+`g:rook_nest_folds`).
 
 When set, RStudio style folding is limited to buffers with filetype=r. When
 this variable is set to 0 (the default) the user defined default folding
 method is used.
+
+------------------------------------------------------------------------------
+g:rook_nest_folds                                                 default: 0
+
+When set to 1, RStudio style folding is performed in a nested manner. Headers
+with trailing `#` are considered level-1 folds, headers with trailing `=` are
+considered level-2 folds, and headers with trailing `-` are considered level-1
+folds.
+
+`# level 1 ####`
+`# level 2 ====`
+`# level 3 ----`
+
+The variable `g:rook_rstudio_folding` must be set to 1 for nesting to take
+effect.
 
 ------------------------------------------------------------------------------
 g:rook_help_type                                               default: html
