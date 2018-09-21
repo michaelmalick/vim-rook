@@ -3,4 +3,3 @@
 cd $(dirname $BASH_SOURCE)
 
 nvim -Nu vader.vimrc +Vader*
-

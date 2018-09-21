@@ -102,4 +102,3 @@ augroup rook_plugin_master
     autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
         \ call rook#auto_attach()
 augroup END
-

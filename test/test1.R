@@ -110,4 +110,3 @@ lm.test <- function (formula, data, subset, weights, na.action, method = "qr",
         z$qr <- NULL
     z
 }
-
