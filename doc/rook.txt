@@ -132,8 +132,8 @@ you don't use it for certain filetypes.
 ==============================================================================
 MAPPINGS                                                       *rook-mappings*
 
-Rook does not provide any mappings. If you want to send code from a vim buffer
-to the selected R console, add the following mappings to your .vimrc:
+Rook provides several <Plug> mappings. If you want to send code from a vim
+buffer to the selected R console, add the following mappings to your .vimrc:
 
     xmap gl  <Plug>RookSend      " Send selected text
     nmap gl  <Plug>RookSend      " Send motion/text object
