@@ -149,6 +149,7 @@ Several common plugin actions are available for mapping:
     nmap <leader>rw <Plug>RookSetwd      " setwd() to current directory
     nmap <leader>rh <Plug>RookRhelp      " Get help for function under cursor
     nmap <leader>ri <Plug>RookRview      " Interactive Rview call
+    xmap <leader>ri <Plug>RookRview      " Interactive Rview call
     nmap <leader>ra <Plug>RookRargs      " Get arguments for function
 
 More generally, if you want key mappings to evaluate frequently used commands

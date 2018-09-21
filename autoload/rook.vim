@@ -227,8 +227,13 @@ function! rook#command_rview(function)
     call rook#rview_complete_add(g:rook_rview_fun)
 endfunction
 
-function! rook#interact_rview()
-    let l:word = expand("<cword>")
+function! rook#interact_rview(visual)
+    if a:visual
+        let l:word_lst = s:rook_get_selection()
+        let l:word = l:word_lst[0]
+    else
+        let l:word = expand("<cword>")
+    endif
     if !exists('g:rook_rview_fun')
         let g:rook_rview_fun = ''
     endif

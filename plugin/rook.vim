@@ -65,7 +65,8 @@ command! -bang -nargs=0 Rdetach call rook#command_rdetach(<bang>0)
 command! -nargs=? Rargs call rook#command_rargs(<q-args>)
 
 nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
-nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview()<CR>
+nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview(0)<CR>
+xnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview(1)<CR>
 nnoremap <silent> <Plug>RookRargs :<C-U>call rook#command_rargs('')<CR>
 nnoremap <silent> <Plug>RookSourceFile
     \ :<C-U>call rook#send_text(rook#get_source_cmd(expand('%:p'), 0, 1))<CR>
