@@ -67,7 +67,9 @@ COMMANDS                                                       *rook-commands*
                     `help()` function argument using that function. If the
                     cursor is over a function call, that function is used. If
                     the search finds a function call with `::` notation, the
-                    package is also supplied to the `help()` call.
+                    package is also supplied to the `help()` call. Tab
+                    completion of previously used `:Rhelp` [args] is
+                    available.
 
 :Rview[args]        Given an R function as [args], wrap the word under the
                     cursor in the [args] function name and evaluate it in the

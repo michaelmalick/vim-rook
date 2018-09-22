@@ -209,6 +209,10 @@ function! rook#completion_target(...)
     endif
 endfunction
 
+function! rook#completion_rhelp(...)
+    return join(g:rook_rhelp_complete_list, "\n")
+endfunction
+
 function! rook#completion_rview(...)
     return join(g:rook_rview_complete_list, "\n")
 endfunction
@@ -264,7 +268,7 @@ function! rook#get_help_call(function)
             let l:word = rook#get_prev_function_name()
         endif
         if string(l:word) ==# '0'
-            call rook#warning_msg("Rook: no previous function found")
+            call rook#warning_msg("Rook: no function found")
             return -1
         endif
     else
@@ -314,6 +318,7 @@ function! rook#command_rhelp(function_input)
     else
         call rook#send_text(l:help_call)
     endif
+    let g:rook_rhelp_complete_list = rook#complete_add(g:rook_rhelp_complete_list, l:function_found)
 endfunction
 
 function! rook#command_rwrite(line1, line2, commands)
