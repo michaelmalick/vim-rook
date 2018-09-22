@@ -97,6 +97,10 @@ COMMANDS                                                       *rook-commands*
                     find the previous R function call and populate the `name`
                     argument of `args()` using that function. If the cursor is
                     over a function call, that function is used.
+
+:Rdev[args]         Given a function name from the R `devtools` package,
+                    evaluate the function in the current R console. Tab
+                    completion for select functions is provided.
                     
 
 Rook does not have a built-in command to create a new target R session in

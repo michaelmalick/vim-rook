@@ -1,6 +1,17 @@
 " rook.vim - autoload functions
 " Author: Michael Malick <malickmj@gmail.com>
 
+function rook#command_rdev(function)
+    let l:str = 'devtools::'.a:function.'()'
+    call rook#send_text(l:str)
+endfunction
+
+function! rook#completion_rdev(...)
+    let l:funs = ["check", "document", "install",
+                \ "test", "unload", "load_all",]
+    return join(l:funs, "\n")
+endfunction
+
 function! rook#get_prev_function_name()
     let l:win_view = winsaveview()
     let l:pattern = '[0-9a-zA-Z:_\.]\+\s*\ze('

@@ -63,6 +63,8 @@ command! -nargs=? -complete=custom,rook#completion_rview Rview
 
 command! -bang -nargs=0 Rdetach call rook#command_rdetach(<bang>0)
 command! -nargs=? Rargs call rook#command_rargs(<q-args>)
+command! -nargs=1 -complete=custom,rook#completion_rdev Rdev 
+    \:call rook#command_rdev(<q-args>)
 
 nnoremap <silent> <Plug>RookRhelp :<C-U>call rook#command_rhelp('')<CR>
 nnoremap <silent> <Plug>RookRview :<C-U>call rook#interact_rview(0)<CR>
