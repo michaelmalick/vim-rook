@@ -213,12 +213,12 @@ function! rook#completion_rview(...)
     return join(g:rook_rview_complete_list, "\n")
 endfunction
 
-function! rook#rview_complete_add(function)
-    "" Add function to rview completion list
-    let l:tmp_lst = insert(g:rook_rview_complete_list, a:function)
+function! rook#complete_add(list, item)
+    "" Add item to completion list
+    let l:tmp_lst = insert(a:list, a:item)
     let l:tmp_lst = reverse(tmp_lst)
     let l:tmp_lst = filter(copy(l:tmp_lst), 'index(l:tmp_lst, v:val, v:key+1)==-1')
-    let g:rook_rview_complete_list = reverse(l:tmp_lst)
+    return reverse(l:tmp_lst)
 endfunction
 
 function! rook#command_rview(function)
@@ -231,7 +231,7 @@ function! rook#command_rview(function)
     endif
     let l:text = g:rook_rview_fun.'('.l:word.')'
     call rook#send_text(l:text)
-    call rook#rview_complete_add(g:rook_rview_fun)
+    let g:rook_rview_complete_list = rook#complete_add(g:rook_rview_complete_list, g:rook_rview_fun)
 endfunction
 
 function! rook#interact_rview(visual)
@@ -255,7 +255,7 @@ function! rook#interact_rview(visual)
     endif
     normal :<ESC>
     call rook#send_text(l:text)
-    call rook#rview_complete_add(g:rook_rview_fun)
+    let g:rook_rview_complete_list = rook#complete_add(g:rook_rview_complete_list, g:rook_rview_fun)
 endfunction
 
 function! rook#get_help_call(function)
