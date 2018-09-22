@@ -55,8 +55,7 @@ command! -nargs=1 -complete=custom,rook#completion_target Rattach
 command! -range -nargs=? Rwrite 
     \:call rook#command_rwrite(<line1>, <line2>, <q-args>)
 
-command! -nargs=? -complete=custom,rook#completion_rfunctions Rhelp 
-    \:call rook#command_rhelp(<q-args>)
+command! -nargs=? Rhelp call rook#command_rhelp(<q-args>)
 
 command! -nargs=? -complete=custom,rook#completion_rview Rview 
     \:call rook#command_rview(<q-args>)

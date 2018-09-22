@@ -60,11 +60,7 @@ COMMANDS                                                       *rook-commands*
                     in a specific package, you can use the `::` notation;
                     `package::function`. For example, to view the R help file
                     for the `image` function in the `raster` package, use
-                    `raster::image`. Tab completion of function names is
-                    provided for most of the functions that are distributed
-                    with R (e.g., functions in base and graphics). Tab
-                    completion of functions from packages not distributed with
-                    R (e.g., ggplot, dplyr) is not provided.
+                    `raster::image`.
 
 :Rhelp              Given no arguments, search backwards from the cursor to
                     find the previous R function call and populate the
