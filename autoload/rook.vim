@@ -171,6 +171,9 @@ function! rook#rstart(new)
         else
             let l:jobid = term_start('R', {'curwin':1})
         endif
+        if g:rook_highlight_console == 1
+            set syntax=rconsole
+        endif
         call win_gotoid(l:start_winid)
         let b:rook_target_id = l:jobid
         call rook#attach_dict_add(b:rook_target_id)

@@ -48,6 +48,10 @@ if !exists('g:rook_auto_attach')
     let g:rook_auto_attach = 1
 endif
 
+if !exists('g:rook_highlight_console')
+    let g:rook_highlight_console = 1
+endif
+
 if !exists('g:rook_nest_folds')
     let g:rook_nest_folds = 0
 endif

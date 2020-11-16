@@ -297,6 +297,12 @@ extensions `*.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw` will be auto-attached to the
 single existing target. If more than one target is attached, no auto-attaching
 occurs. Set to 0 to turn-off off auto-attaching.
 
+------------------------------------------------------------------------------
+g:rook_highlight_console                                          default: 1
+
+When set to 1, syntax highlighting of the attached R console is enabled. Set
+to 0 to turn-off syntax highlighting of the R console.
+
 
 ==============================================================================
 BUGS                                                               *rook-bugs*
