@@ -95,7 +95,7 @@ function! rook#fold_expr()
     endif
 endfunction
 
-function! rook#get_source_cmd(fpath, echo, local)
+function! rook#get_source_cmd_r(fpath, echo, local)
     let l:fpath = rook#win_path_fslash(a:fpath)
     let l:args = [ ]
     if &fileencoding ==# 'utf-8'
@@ -112,9 +112,28 @@ function! rook#get_source_cmd(fpath, echo, local)
     return l:cmd
 endfunction
 
-function! rook#source_send()
+function! rook#get_source_cmd_julia(fpath)
+    let l:fpath = rook#win_path_fslash(a:fpath)
+    let l:cmd = 'include("' . l:fpath . '"' . ')'
+    return l:cmd
+endfunction
+
+function! rook#get_source_cmd(fpath, echo, local)
+    let l:buf_dialect = getbufvar(bufname(), "rook_dialect")
+    if l:buf_dialect == "julia"
+        return rook#get_source_cmd_julia(a:fpath)
+    elseif l:buf_dialect == "R"
+        return rook#get_source_cmd_r(a:fpath, a:echo, a:local)
+    " else
+    "     call rook#warning_msg("Rook: no source command for filetype")
+    else
+        return 0
+    endif
+endfunction
+
+function! rook#set_source_send_command()
     if g:rook_source_send
-        let g:rook_source_send_command = rook#get_source_cmd(g:rook_tmp_file, 1, 1)
+        let b:rook_source_send_command = rook#get_source_cmd(g:rook_tmp_file, 1, 1)
     endif
 endfunction
 
@@ -137,6 +156,8 @@ function! rook#get_active_tmux_session_id()
 endfunction
 
 function! rook#rstart(new)
+    let l:cmd = getbufvar(bufname(), "rook_start_command")
+    let l:dialect = b:rook_dialect
     if g:rook_target_type ==# 'tmux'
         if !exists('$TMUX')
             call rook#warning_msg("Rook: vim isn't inside tmux, use :Rattach instead")
@@ -156,7 +177,7 @@ function! rook#rstart(new)
         call system('tmux select-pane -t '.l:start_paneid)
         let b:rook_target_id = l:target_paneid
         call rook#attach_dict_add(b:rook_target_id)
-        call rook#send_text('R')
+        call rook#send_text(l:cmd)
     elseif g:rook_target_type ==# 'vim'
         let l:start_winid = win_getid()
         exe a:new
@@ -167,13 +188,19 @@ function! rook#rstart(new)
         endif
         exe 'enew'
         if has('nvim')
-            let l:jobid = termopen('R')
+            let l:jobid = termopen(l:cmd)
         else
-            let l:jobid = term_start('R', {'curwin':1})
+            let l:jobid = term_start(l:cmd, {'curwin':1})
         endif
+
         if g:rook_highlight_console == 1
             set syntax=rconsole
         endif
+
+        if(l:dialect == 'R')
+            set ft=rterm
+        endif
+
         call win_gotoid(l:start_winid)
         let b:rook_target_id = l:jobid
         call rook#attach_dict_add(b:rook_target_id)
@@ -497,7 +524,7 @@ function! rook#send_selection()
     let l:start_line = line("'<")
     let l:end_line = line("'>")
     if g:rook_source_send && l:start_line != l:end_line
-        call rook#send_text(g:rook_source_send_command)
+        call rook#send_text(b:rook_source_send_command)
     else
         let l:select_text = readfile(g:rook_tmp_file)
         for i in l:select_text

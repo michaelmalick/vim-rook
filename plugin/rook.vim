@@ -2,6 +2,10 @@
 " Author:   Michael Malick <malickmj@gmail.com>
 " Version:  2.1
 
+"" TODO Julia: Rhelp
+"" TODO Julia: Rargs
+"" TODO Clean up multi-language functions
+
 
 if exists('g:loaded_rook') || &cp || v:version < 700
   finish
@@ -102,13 +106,24 @@ xnoremap <silent> <Plug>RookRmdChunkVisualA
 onoremap <silent> <Plug>RookRmdChunkPendingA
     \ :<C-U>call rook#text_object_rmdchunk(0)<CR>
 
+augroup rook_filetype
+    autocmd!
+    autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw :let b:rook_dialect = "R"
+    autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw :let b:rook_start_command = "R"
+    autocmd BufNewFile,BufRead *.jl :let b:rook_dialect = "julia"
+    autocmd BufNewFile,BufRead *.jl :let b:rook_start_command = "julia"
+    "" on buffer entry set b:rook_target_id
+    autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw,*.jl
+        \ call rook#auto_attach()
+    "" set rstudio style folding
+    autocmd FileType r call rook#fold_expr()
+    autocmd FileType julia call rook#fold_expr()
+augroup END
+
+"" Needs to come after 'rook_filetype' to ensure vars are set
 augroup rook_plugin_master
     autocmd!
     autocmd VimLeave * call delete(g:rook_tmp_file)
-    autocmd BufNewFile,BufRead * call rook#source_send()
-    "" only set rstudio-folding for r filetypes
-    autocmd FileType r call rook#fold_expr()
-    "" on buffer entry set b:rook_target_id
-    autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw
-        \ call rook#auto_attach()
+    autocmd BufNewFile,BufRead * call rook#set_source_send_command()
 augroup END
+
