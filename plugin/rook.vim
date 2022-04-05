@@ -92,10 +92,10 @@ nnoremap <silent> <Plug>RookSend     :<C-U>call rook#send(0)<CR>g@
 nnoremap <silent> <Plug>RookSendLine :<C-U>call rook#send_line()<Bar>
     \ exe 'norm! '.g:rook_count1.'g@_'<CR>
 
-xnoremap <silent> <Plug>RookRFunctionVisual
-    \ :<C-U>call rook#text_object_rfunction()<CR>
-onoremap <silent> <Plug>RookRFunctionPending
-    \ :<C-U>call rook#text_object_rfunction()<CR>
+xnoremap <silent> <Plug>RookFunctionVisual
+    \ :<C-U>call rook#text_object_function()<CR>
+onoremap <silent> <Plug>RookFunctionPending
+    \ :<C-U>call rook#text_object_function()<CR>
 
 xnoremap <silent> <Plug>RookRmdChunkVisualI
     \ :<C-U>call rook#text_object_rmdchunk(1)<CR>

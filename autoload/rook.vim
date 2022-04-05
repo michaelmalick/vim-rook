@@ -634,7 +634,7 @@ function! s:cursor_in_text_object(start_end)
     return l:in_fun
 endfunction
 
-function! s:start_end_rfunction()
+function! s:start_end_function_r()
     "" returns a list of start and end line numbers for
     "" the previous function definition in the buffer,
     "" [start_line, end_line]. If no previous function
@@ -655,10 +655,37 @@ function! s:start_end_rfunction()
     return l:start_end
 endfunction
 
-function! rook#text_object_rfunction()
-    let l:start_end = s:start_end_rfunction()
+function! s:start_end_function_julia()
+    "" returns a list of start and end line numbers for
+    "" the previous function definition in the buffer,
+    "" [start_line, end_line]. If no previous function
+    "" is found, return [0, 0].
+    let l:win_view = winsaveview()
+    let l:pattern = '^\s*function\s'
+    let l:start_line = search(l:pattern, 'bc')
+    if l:start_line == 0
+        let l:start_end = [0, 0]
+    else
+        "" TODO this assumes matchit.vim is loaded
+        normal %
+        let l:end_line = line('.')
+        let l:start_end = [l:start_line, l:end_line]
+    endif
+    call winrestview(l:win_view)
+    return l:start_end
+endfunction
+
+function! rook#text_object_function()
+    let l:buf_dialect = getbufvar(bufname(), "rook_dialect")
+    if l:buf_dialect == "julia"
+        let l:start_end = s:start_end_function_julia()
+    elseif l:buf_dialect == "R"
+        let l:start_end = s:start_end_function_r()
+    else
+        call rook#warning_msg("Rook: dialect not set")
+    end
     if !s:cursor_in_text_object(l:start_end)
-        call rook#warning_msg("Rook: cursor not inside an R function")
+        call rook#warning_msg("Rook: cursor not inside a function")
         let s:not_in_text_object = 1
         return
     else
