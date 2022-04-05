@@ -111,7 +111,7 @@ augroup rook_filetype
     autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw :let b:rook_dialect = "R"
     autocmd BufNewFile,BufRead *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw :let b:rook_start_command = "R"
     autocmd BufNewFile,BufRead *.jl :let b:rook_dialect = "julia"
-    autocmd BufNewFile,BufRead *.jl :let b:rook_start_command = "julia"
+    autocmd BufNewFile,BufRead *.jl :let b:rook_start_command = "julia --threads=auto"
     "" on buffer entry set b:rook_target_id
     autocmd BufEnter,BufWinEnter *.r,*.R,*.rmd,*.Rmd,*.rnw,*.Rnw,*.jl
         \ call rook#auto_attach()
